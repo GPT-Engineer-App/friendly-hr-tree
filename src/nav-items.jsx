@@ -1,14 +1,29 @@
-import { Home } from "lucide-react";
+import { Users, Briefcase, FileText, Settings } from "lucide-react";
 import Index from "./pages/Index.jsx";
 
-/**
- * Central place for defining the navigation items. Used for navigation components and routing.
- */
 export const navItems = [
   {
-    title: "Home",
+    title: "Employees",
     to: "/",
-    icon: <Home className="h-4 w-4" />,
+    icon: <Users className="h-4 w-4" />,
     page: <Index />,
+  },
+  {
+    title: "Departments",
+    to: "/departments",
+    icon: <Briefcase className="h-4 w-4" />,
+    page: null, // We'll create this page later
+  },
+  {
+    title: "Leave Management",
+    to: "/leave-management",
+    icon: <FileText className="h-4 w-4" />,
+    page: null, // We'll create this page later
+  },
+  {
+    title: "Settings",
+    to: "/settings",
+    icon: <Settings className="h-4 w-4" />,
+    page: null, // We'll create this page later
   },
 ];
