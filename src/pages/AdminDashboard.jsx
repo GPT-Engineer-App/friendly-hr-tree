@@ -90,14 +90,14 @@ const UserManagement = () => {
           <form onSubmit={createUser} className="space-y-4">
             <Input
               type="email"
-              placeholder="Email"
+              placeholder="Enter new user's email"
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               required
             />
             <Input
               type="password"
-              placeholder="Password"
+              placeholder="Enter new user's password"
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
               required
