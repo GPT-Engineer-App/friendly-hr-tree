@@ -94,6 +94,7 @@ const UserManagement = () => {
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               required
+              autocomplete="off"
             />
             <Input
               type="password"
@@ -101,6 +102,7 @@ const UserManagement = () => {
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
               required
+              autocomplete="off"
             />
             <Button type="submit">Create User</Button>
           </form>
