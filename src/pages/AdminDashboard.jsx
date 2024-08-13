@@ -24,6 +24,7 @@ const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -48,10 +49,19 @@ const UserManagement = () => {
         email_confirm: true
       });
       if (error) throw error;
+
+      // Set the is_admin metadata
+      const { error: updateError } = await supabase.auth.admin.updateUserById(
+        data.user.id,
+        { app_metadata: { is_admin: isAdmin } }
+      );
+      if (updateError) throw updateError;
+
       toast.success('User created successfully');
       fetchUsers();
       setNewUserEmail('');
       setNewUserPassword('');
+      setIsAdmin(false);
     } catch (error) {
       toast.error('Error creating user: ' + error.message);
     }
@@ -104,6 +114,14 @@ const UserManagement = () => {
               required
               autocomplete="off"
             />
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="isAdmin"
+                checked={isAdmin}
+                onCheckedChange={(checked) => setIsAdmin(checked)}
+              />
+              <label htmlFor="isAdmin">Admin</label>
+            </div>
             <Button type="submit">Create User</Button>
           </form>
         </CardContent>
@@ -116,7 +134,7 @@ const UserManagement = () => {
           <ul className="space-y-2">
             {users.map((user) => (
               <li key={user.id} className="flex items-center justify-between">
-                <span>{user.email}</span>
+                <span>{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
                 <div>
                   <Button onClick={() => updateUserEmail(user.id, prompt('Enter new email'))}>Update Email</Button>
                   <Button onClick={() => deleteUser(user.id)} variant="destructive">Delete</Button>
