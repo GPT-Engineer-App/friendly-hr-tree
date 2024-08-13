@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from 'react';
-import { supabase, SupabaseProvider } from './index.js';
+import { supabase } from './index.js';
 import { useQueryClient } from '@tanstack/react-query';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
@@ -7,16 +7,6 @@ import { ThemeSupa } from '@supabase/auth-ui-shared';
 const SupabaseAuthContext = createContext();
 
 export const SupabaseAuthProvider = ({ children }) => {
-  return (
-    <SupabaseProvider>
-      <SupabaseAuthProviderInner>
-        {children}
-      </SupabaseAuthProviderInner>
-    </SupabaseProvider>
-  );
-}
-
-export const SupabaseAuthProviderInner = ({ children }) => {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const queryClient = useQueryClient();
@@ -29,29 +19,34 @@ export const SupabaseAuthProviderInner = ({ children }) => {
       setLoading(false);
     };
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session);
-      queryClient.invalidateQueries('user');
+      if (session) {
+        const { data: { user } } = await supabase.auth.getUser();
+        queryClient.setQueryData(['user'], user);
+      } else {
+        queryClient.setQueryData(['user'], null);
+      }
     });
 
     getSession();
 
     return () => {
       authListener.subscription.unsubscribe();
-      setLoading(false);
     };
   }, [queryClient]);
 
-  const logout = async () => {
-    await supabase.auth.signOut();
-    setSession(null);
-    queryClient.invalidateQueries('user');
-    setLoading(false);
+  const value = {
+    session,
+    loading,
+    signIn: (data) => supabase.auth.signInWithPassword(data),
+    signOut: () => supabase.auth.signOut(),
+    user: session?.user ?? null,
   };
 
   return (
-    <SupabaseAuthContext.Provider value={{ session, loading, logout }}>
-      {children}
+    <SupabaseAuthContext.Provider value={value}>
+      {!loading && children}
     </SupabaseAuthContext.Provider>
   );
 };
