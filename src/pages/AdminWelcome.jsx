@@ -38,6 +38,11 @@ const AdminWelcome = () => {
             <li>Implemented automatic folder creation for employee documents in Supabase storage</li>
             <li>Added error handling and success notifications for employee creation process</li>
             <li>Optimized storage paths for employee documents and profile pictures</li>
+            <li>Enhanced Employee Management with inline editing for all fields</li>
+            <li>Implemented expandable rows for detailed employee information</li>
+            <li>Added date picker for date fields in inline editing</li>
+            <li>Improved address editing with a modal for better user experience</li>
+            <li>Updated profile picture upload in both add and edit functionalities</li>
           </ul>
         </CardContent>
       </Card>

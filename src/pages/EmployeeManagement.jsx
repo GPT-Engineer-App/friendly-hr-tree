@@ -7,7 +7,9 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUpDown, Edit, Trash2, Save, X } from 'lucide-react';
+import { Search, ArrowUpDown, Edit, Trash2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { DatePicker } from "@/components/ui/date-picker";
 
 const EmployeeManagement = () => {
   const [newEmployee, setNewEmployee] = useState({
@@ -30,6 +32,7 @@ const EmployeeManagement = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [inlineEditingEmployee, setInlineEditingEmployee] = useState(null);
+  const [expandedEmployee, setExpandedEmployee] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -61,55 +64,25 @@ const EmployeeManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log("Starting employee creation process");
-
       // Basic validation
       if (!newEmployee.emp_id || !newEmployee.name || !newEmployee.email) {
         throw new Error("Employee ID, Name, and Email are required fields.");
       }
 
       // Insert employee data
-      console.log("Inserting new employee data:", newEmployee);
       const { data, error } = await supabase
         .from('employees')
         .insert([newEmployee])
         .select();
 
       if (error) throw error;
-      console.log("Employee inserted successfully:", data);
 
       const employeeId = data[0].emp_id;
       const sanitizedEmpId = employeeId.replace(/\s+/g, '_').toLowerCase();
 
-      // Create folders
-      const folderPath = `${sanitizedEmpId}`;
-      const { data: folderData, error: folderError } = await supabase
-        .storage
-        .from('employees')
-        .list(folderPath);
-
-      if (folderError && folderError.message !== 'The resource was not found') {
-        throw folderError;
-      }
-
-      if (!folderData) {
-        await supabase.storage.from('employees').upload(`${folderPath}/.keep`, new Blob(['']));
-      }
-      console.log("Folders created successfully");
-
-      // Insert storage paths
-      const { error: pathError } = await supabase
-        .from('employee_storage_paths')
-        .insert([
-          { emp_id: employeeId, storage_path: folderPath }
-        ]);
-
-      if (pathError) throw pathError;
-      console.log("Storage paths inserted successfully");
-
-      // Upload profile picture if provided
+      // Create folders and upload profile picture
       if (profilePicture) {
-        console.log("Uploading profile picture");
+        const folderPath = `${sanitizedEmpId}`;
         const fileExt = profilePicture.name.split('.').pop();
         const filePath = `${folderPath}/profile_picture.${fileExt}`;
 
@@ -118,24 +91,17 @@ const EmployeeManagement = () => {
           .upload(filePath, profilePicture);
 
         if (uploadError) throw uploadError;
-        console.log("Profile picture uploaded successfully");
 
-        // Get public URL for the uploaded file
         const { data: urlData } = supabase.storage
           .from('employees')
           .getPublicUrl(filePath);
 
-        // Update employee record with profile picture URL
-        const { error: updateError } = await supabase
+        await supabase
           .from('employees')
           .update({ profile_picture_url: urlData.publicUrl })
           .eq('emp_id', employeeId);
-
-        if (updateError) throw updateError;
-        console.log("Employee document record updated successfully");
       }
 
-      console.log("The employee creation process was completed successfully.");
       toast.success('Employee added successfully');
       fetchEmployees();
       setNewEmployee({
@@ -151,7 +117,6 @@ const EmployeeManagement = () => {
       });
       setProfilePicture(null);
     } catch (error) {
-      console.error("Error in employee creation process:", error);
       toast.error('Error adding employee: ' + error.message);
     }
   };
@@ -212,6 +177,7 @@ const EmployeeManagement = () => {
 
   const handleInlineEdit = (employee) => {
     setInlineEditingEmployee({ ...employee });
+    setExpandedEmployee(employee.emp_id);
   };
 
   const handleInlineEditChange = (e, field) => {
@@ -228,10 +194,15 @@ const EmployeeManagement = () => {
       if (error) throw error;
       toast.success('Employee updated successfully');
       setInlineEditingEmployee(null);
+      setExpandedEmployee(null);
       fetchEmployees();
     } catch (error) {
       toast.error('Error updating employee: ' + error.message);
     }
+  };
+
+  const handleExpand = (empId) => {
+    setExpandedEmployee(expandedEmployee === empId ? null : empId);
   };
 
   const filteredEmployees = employees.filter(employee =>
@@ -391,63 +362,82 @@ const EmployeeManagement = () => {
             </TableHeader>
             <TableBody>
               {currentEmployees.map((employee) => (
-                <TableRow key={employee.emp_id}>
-                  <TableCell className="font-medium">{employee.emp_id}</TableCell>
-                  <TableCell>
-                    {inlineEditingEmployee && inlineEditingEmployee.emp_id === employee.emp_id ? (
-                      <Input
-                        value={inlineEditingEmployee.name}
-                        onChange={(e) => handleInlineEditChange(e, 'name')}
-                      />
-                    ) : (
-                      employee.name
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {inlineEditingEmployee && inlineEditingEmployee.emp_id === employee.emp_id ? (
-                      <Input
-                        value={inlineEditingEmployee.designation}
-                        onChange={(e) => handleInlineEditChange(e, 'designation')}
-                      />
-                    ) : (
-                      employee.designation
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {inlineEditingEmployee && inlineEditingEmployee.emp_id === employee.emp_id ? (
-                      <Input
-                        value={inlineEditingEmployee.email}
-                        onChange={(e) => handleInlineEditChange(e, 'email')}
-                      />
-                    ) : (
-                      employee.email
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {inlineEditingEmployee && inlineEditingEmployee.emp_id === employee.emp_id ? (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={handleInlineEditSave}>
-                          <Save className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setInlineEditingEmployee(null)}>
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button variant="ghost" size="sm" onClick={() => handleInlineEdit(employee)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleUpdate(employee)}>
-                          Full Edit
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(employee.emp_id)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </>
-                    )}
-                  </TableCell>
-                </TableRow>
+                <React.Fragment key={employee.emp_id}>
+                  <TableRow>
+                    <TableCell className="font-medium">{employee.emp_id}</TableCell>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell>{employee.designation}</TableCell>
+                    <TableCell>{employee.email}</TableCell>
+                    <TableCell>
+                      <Button variant="ghost" size="sm" onClick={() => handleExpand(employee.emp_id)}>
+                        {expandedEmployee === employee.emp_id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleUpdate(employee)}>
+                        Full Edit
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(employee.emp_id)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  {expandedEmployee === employee.emp_id && (
+                    <TableRow>
+                      <TableCell colSpan={5}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                          {Object.entries(employee).map(([key, value]) => {
+                            if (key === 'emp_id') return null; // Skip employee ID as it's not editable
+                            return (
+                              <div key={key}>
+                                <Label htmlFor={`inline-${key}`}>{key.replace('_', ' ').toUpperCase()}</Label>
+                                {key === 'date_of_joining' || key === 'dob' ? (
+                                  <DatePicker
+                                    id={`inline-${key}`}
+                                    selected={new Date(value)}
+                                    onChange={(date) => handleInlineEditChange({ target: { value: date.toISOString().split('T')[0] } }, key)}
+                                  />
+                                ) : key === 'address' ? (
+                                  <Dialog>
+                                    <DialogTrigger asChild>
+                                      <Button variant="outline">Edit Address</Button>
+                                    </DialogTrigger>
+                                    <DialogContent>
+                                      <DialogHeader>
+                                        <DialogTitle>Edit Address</DialogTitle>
+                                      </DialogHeader>
+                                      <Textarea
+                                        id={`inline-${key}`}
+                                        value={inlineEditingEmployee?.[key] || value}
+                                        onChange={(e) => handleInlineEditChange(e, key)}
+                                        rows={4}
+                                      />
+                                    </DialogContent>
+                                  </Dialog>
+                                ) : key === 'profile_picture_url' ? (
+                                  <Input
+                                    id={`inline-${key}`}
+                                    type="file"
+                                    onChange={(e) => handleInlineEditChange(e, key)}
+                                    accept="image/*"
+                                  />
+                                ) : (
+                                  <Input
+                                    id={`inline-${key}`}
+                                    value={inlineEditingEmployee?.[key] || value}
+                                    onChange={(e) => handleInlineEditChange(e, key)}
+                                  />
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-end space-x-2 mt-4">
+                          <Button onClick={() => setExpandedEmployee(null)}>Cancel</Button>
+                          <Button onClick={handleInlineEditSave}>Save Changes</Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
               ))}
             </TableBody>
           </Table>
