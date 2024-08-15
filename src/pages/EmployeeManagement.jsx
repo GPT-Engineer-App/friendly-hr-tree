@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, ArrowUpDown, Edit, Trash2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DatePicker } from "@/components/ui/date-picker";
 
 const EmployeeManagement = () => {
   const [newEmployee, setNewEmployee] = useState({
@@ -390,10 +389,11 @@ const EmployeeManagement = () => {
                               <div key={key}>
                                 <Label htmlFor={`inline-${key}`}>{key.replace('_', ' ').toUpperCase()}</Label>
                                 {key === 'date_of_joining' || key === 'dob' ? (
-                                  <DatePicker
+                                  <Input
                                     id={`inline-${key}`}
-                                    selected={new Date(value)}
-                                    onChange={(date) => handleInlineEditChange({ target: { value: date.toISOString().split('T')[0] } }, key)}
+                                    type="date"
+                                    value={value}
+                                    onChange={(e) => handleInlineEditChange(e, key)}
                                   />
                                 ) : key === 'address' ? (
                                   <Dialog>
