@@ -63,7 +63,7 @@ const EmployeeManagement = () => {
       const employeeId = data[0].emp_id;
 
       if (profilePicture) {
-        const folderPath = `${employeeId}`;
+        const folderPath = `${employeeId.replace(/\//g, '_')}`;
         const fileExt = profilePicture.name.split('.').pop();
         const filePath = `${folderPath}/profile_picture.${fileExt}`;
 
