@@ -372,7 +372,7 @@ const EmployeeManagement = () => {
                         {expandedEmployee === employee.emp_id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleUpdate(employee)}>
-                        Full Edit
+                        Edit
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleDelete(employee.emp_id)}>
                         <Trash2 className="h-4 w-4" />
@@ -463,7 +463,7 @@ const EmployeeManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Full Edit Form */}
+      {/* Edit Form */}
       {editingEmployee && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <Card className="w-full max-w-2xl">
