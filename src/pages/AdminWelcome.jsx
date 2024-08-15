@@ -32,6 +32,12 @@ const AdminWelcome = () => {
             <li>Implemented pagination for the user list to handle large numbers of users</li>
             <li>Added sorting options for user list (by email)</li>
             <li>Improved overall responsiveness of the User Management interface</li>
+            <li>Implemented Employee Management functionality with form for adding new employees</li>
+            <li>Added profile picture upload feature for new employees</li>
+            <li>Integrated Supabase storage for employee documents and profile pictures</li>
+            <li>Implemented automatic folder creation for employee documents in Supabase storage</li>
+            <li>Added error handling and success notifications for employee creation process</li>
+            <li>Optimized storage paths for employee documents and profile pictures</li>
           </ul>
         </CardContent>
       </Card>
