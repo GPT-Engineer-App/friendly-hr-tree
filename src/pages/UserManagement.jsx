@@ -5,7 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Eye, EyeOff, Search } from 'lucide-react';
+import { Eye, EyeOff, Search, ArrowUpDown, Download } from 'lucide-react';
+import { CSVLink } from "react-csv";
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +29,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const USERS_PER_PAGE = 10;
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -42,6 +54,9 @@ const UserManagement = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortField, setSortField] = useState('email');
+  const [sortDirection, setSortDirection] = useState('asc');
 
   useEffect(() => {
     fetchUsers();
@@ -51,8 +66,13 @@ const UserManagement = () => {
     const filtered = users.filter(user =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    setFilteredUsers(filtered);
-  }, [searchTerm, users]);
+    const sorted = filtered.sort((a, b) => {
+      if (a[sortField] < b[sortField]) return sortDirection === 'asc' ? -1 : 1;
+      if (a[sortField] > b[sortField]) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    setFilteredUsers(sorted);
+  }, [searchTerm, users, sortField, sortDirection]);
 
   const fetchUsers = async () => {
     try {
@@ -139,6 +159,36 @@ const UserManagement = () => {
     }
   };
 
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    doc.autoTable({
+      head: [['Email', 'Admin']],
+      body: filteredUsers.map(user => [user.email, user.app_metadata?.is_admin ? 'Yes' : 'No']),
+    });
+    doc.save('users.pdf');
+  };
+
+  const csvData = filteredUsers.map(user => ({
+    email: user.email,
+    isAdmin: user.app_metadata?.is_admin ? 'Yes' : 'No'
+  }));
+
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * USERS_PER_PAGE,
+    currentPage * USERS_PER_PAGE
+  );
+
+  const totalPages = Math.ceil(filteredUsers.length / USERS_PER_PAGE);
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">User Management</h2>
@@ -199,128 +249,189 @@ const UserManagement = () => {
           <CardTitle>User List</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 relative">
-            <Input
-              type="text"
-              placeholder="Search users by email"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          <div className="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0 sm:space-x-2">
+            <div className="relative w-full sm:w-auto">
+              <Input
+                type="text"
+                placeholder="Search users by email"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            </div>
+            <div className="flex space-x-2">
+              <CSVLink
+                data={csvData}
+                filename={"users.csv"}
+                className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+              >
+                Export CSV
+              </CSVLink>
+              <Button onClick={exportToPDF}>
+                Export PDF
+              </Button>
+            </div>
           </div>
-          <ul className="space-y-2">
-            {filteredUsers.map((user) => (
-              <li key={user.id} className="flex flex-col sm:flex-row sm:items-center justify-between">
-                <span className="mb-2 sm:mb-0">{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
-                <div className="space-x-2">
-                  <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button onClick={() => {
-                        setEditingUser(user);
-                        setEditEmail(user.email);
-                        setEditPassword('');
-                        setEditIsAdmin(user.app_metadata?.is_admin || false);
-                        setIsUpdateDialogOpen(true);
-                      }}>
-                        Update
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Edit User</DialogTitle>
-                        <DialogDescription>
-                          Make changes to the user's details here. Click save when you're done.
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor={`editEmail-${user.id}`} className="text-right">
-                            Email
-                          </label>
-                          <Input
-                            id={`editEmail-${user.id}`}
-                            value={editEmail}
-                            onChange={(e) => setEditEmail(e.target.value)}
-                            className="col-span-3"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor={`editPassword-${user.id}`} className="text-right">
-                            New Password
-                          </label>
-                          <div className="col-span-3 relative">
-                            <Input
-                              id={`editPassword-${user.id}`}
-                              type={showEditPassword ? "text" : "password"}
-                              value={editPassword}
-                              onChange={(e) => setEditPassword(e.target.value)}
-                              className="pr-10"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowEditPassword(!showEditPassword)}
-                              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
-                            >
-                              {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`editIsAdmin-${user.id}`}
-                            checked={editIsAdmin}
-                            onCheckedChange={(checked) => setEditIsAdmin(checked)}
-                          />
-                          <label htmlFor={`editIsAdmin-${user.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            Admin
-                          </label>
-                        </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr>
+                  <th className="text-left p-2">
+                    <button onClick={() => handleSort('email')} className="flex items-center">
+                      Email <ArrowUpDown className="ml-1 h-4 w-4" />
+                    </button>
+                  </th>
+                  <th className="text-left p-2">Admin</th>
+                  <th className="text-left p-2">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedUsers.map((user) => (
+                  <tr key={user.id} className="border-t">
+                    <td className="p-2">{user.email}</td>
+                    <td className="p-2">{user.app_metadata?.is_admin ? 'Yes' : 'No'}</td>
+                    <td className="p-2">
+                      <div className="flex space-x-2">
+                        <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button onClick={() => {
+                              setEditingUser(user);
+                              setEditEmail(user.email);
+                              setEditPassword('');
+                              setEditIsAdmin(user.app_metadata?.is_admin || false);
+                              setIsUpdateDialogOpen(true);
+                            }}>
+                              Update
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="sm:max-w-[425px]">
+                            <DialogHeader>
+                              <DialogTitle>Edit User</DialogTitle>
+                              <DialogDescription>
+                                Make changes to the user's details here. Click save when you're done.
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="grid gap-4 py-4">
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor={`editEmail-${user.id}`} className="text-right">
+                                  Email
+                                </label>
+                                <Input
+                                  id={`editEmail-${user.id}`}
+                                  value={editEmail}
+                                  onChange={(e) => setEditEmail(e.target.value)}
+                                  className="col-span-3"
+                                />
+                              </div>
+                              <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor={`editPassword-${user.id}`} className="text-right">
+                                  New Password
+                                </label>
+                                <div className="col-span-3 relative">
+                                  <Input
+                                    id={`editPassword-${user.id}`}
+                                    type={showEditPassword ? "text" : "password"}
+                                    value={editPassword}
+                                    onChange={(e) => setEditPassword(e.target.value)}
+                                    className="pr-10"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => setShowEditPassword(!showEditPassword)}
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                                  >
+                                    {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                  </button>
+                                </div>
+                              </div>
+                              <div className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`editIsAdmin-${user.id}`}
+                                  checked={editIsAdmin}
+                                  onCheckedChange={(checked) => setEditIsAdmin(checked)}
+                                />
+                                <label htmlFor={`editIsAdmin-${user.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                  Admin
+                                </label>
+                              </div>
+                            </div>
+                            <DialogFooter>
+                              <Button type="button" variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>Cancel</Button>
+                              <Button type="button" onClick={() => setIsConfirmDialogOpen(true)}>Save changes</Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
+                        <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirm User Update</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to update this user's information? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={updateUser}>Confirm</AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button variant="destructive">Delete</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the user
+                                account and remove their data from our servers.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction onClick={() => deleteUser(user.id)}>
+                                Continue
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
-                      <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>Cancel</Button>
-                        <Button type="button" onClick={() => setIsConfirmDialogOpen(true)}>Save changes</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                  <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Confirm User Update</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Are you sure you want to update this user's information? This action cannot be undone.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={updateUser}>Confirm</AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive">Delete</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently delete the user
-                          account and remove their data from our servers.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => deleteUser(user.id)}>
-                          Continue
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </li>
-            ))}
-          </ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 flex justify-between items-center">
+            <div>
+              <span className="mr-2">Page {currentPage} of {totalPages}</span>
+              <Select value={USERS_PER_PAGE.toString()} onValueChange={(value) => setUsersPerPage(parseInt(value))}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Users per page" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="5">5 per page</SelectItem>
+                  <SelectItem value="10">10 per page</SelectItem>
+                  <SelectItem value="20">20 per page</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-x-2">
+              <Button
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </Button>
+              <Button
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

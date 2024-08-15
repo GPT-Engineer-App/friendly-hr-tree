@@ -28,6 +28,10 @@ const AdminWelcome = () => {
             <li>Added password visibility toggle to the edit user pop-up window</li>
             <li>Implemented search functionality for users by email in the User Management section</li>
             <li>Enhanced responsive design for User Management interface</li>
+            <li>Added export functionality for user data (CSV and PDF formats)</li>
+            <li>Implemented pagination for the user list to handle large numbers of users</li>
+            <li>Added sorting options for user list (by email)</li>
+            <li>Improved overall responsiveness of the User Management interface</li>
           </ul>
         </CardContent>
       </Card>
