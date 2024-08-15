@@ -53,17 +53,26 @@ const EmployeeManagement = () => {
         throw new Error("Employee ID, Name, and Email are required fields.");
       }
 
-      const { data, error } = await supabase
+      // 1. Create employee record
+      const { data: employeeData, error: employeeError } = await supabase
         .from('employees')
         .insert([newEmployee])
         .select();
 
-      if (error) throw error;
+      if (employeeError) throw employeeError;
 
-      const employeeId = data[0].emp_id;
+      const employeeId = employeeData[0].emp_id;
 
+      // 2. Create folder reference in storage_paths
+      const folderPath = employeeId.replace(/\//g, '_');
+      const { error: storagePathError } = await supabase
+        .from('storage_paths')
+        .insert([{ emp_id: employeeId, folder_path: folderPath }]);
+
+      if (storagePathError) throw storagePathError;
+
+      // 3. Upload profile picture if provided
       if (profilePicture) {
-        const folderPath = `${employeeId.replace(/\//g, '_')}`;
         const fileExt = profilePicture.name.split('.').pop();
         const filePath = `${folderPath}/profile_picture.${fileExt}`;
 
@@ -73,15 +82,12 @@ const EmployeeManagement = () => {
 
         if (uploadError) throw uploadError;
 
+        // 4. Get the public URL of the uploaded file
         const { data: urlData } = supabase.storage
           .from('employees_info')
           .getPublicUrl(filePath);
 
-        await supabase
-          .from('employees')
-          .update({ profile_picture_url: urlData.publicUrl })
-          .eq('emp_id', employeeId);
-
+        // 5. Store the URL in employee_documents
         const { error: docError } = await supabase
           .from('employee_documents')
           .insert({
@@ -90,6 +96,7 @@ const EmployeeManagement = () => {
             file_path: filePath,
             file_type: fileExt,
             uploaded_by: 'system',
+            file_url: urlData.publicUrl
           });
 
         if (docError) throw docError;
