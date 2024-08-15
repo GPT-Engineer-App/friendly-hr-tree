@@ -102,10 +102,12 @@ const EmployeeManagement = () => {
           .insert({
             emp_id: sanitizedEmpId,
             document_type: 'profile_picture',
-            document_path: filePath,
             document_url: publicUrlData.publicUrl
           });
-        if (documentError) throw documentError;
+        if (documentError) {
+          console.error('Error inserting document record:', documentError);
+          throw documentError;
+        }
         console.log('Employee document record updated successfully');
       }
 
