@@ -69,7 +69,10 @@ const EmployeeManagement = () => {
         .from('storage_paths')
         .insert([{ emp_id: employeeId, folder_path: folderPath }]);
 
-      if (storagePathError) throw storagePathError;
+      if (storagePathError) {
+        console.error('Storage path error:', storagePathError);
+        throw new Error(`Error creating storage path: ${storagePathError.message}`);
+      }
 
       // 3. Upload profile picture if provided
       if (profilePicture) {
@@ -80,7 +83,10 @@ const EmployeeManagement = () => {
           .from('employees_info')
           .upload(filePath, profilePicture);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          throw new Error(`Error uploading profile picture: ${uploadError.message}`);
+        }
 
         // 4. Get the public URL of the uploaded file
         const { data: urlData } = supabase.storage
@@ -99,7 +105,10 @@ const EmployeeManagement = () => {
             file_url: urlData.publicUrl
           });
 
-        if (docError) throw docError;
+        if (docError) {
+          console.error('Document error:', docError);
+          throw new Error(`Error storing document information: ${docError.message}`);
+        }
       }
 
       toast.success('Employee added successfully');
