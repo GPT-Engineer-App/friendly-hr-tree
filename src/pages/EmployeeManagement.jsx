@@ -148,17 +148,41 @@ const EmployeeManagement = () => {
         .select();
       if (error) throw error;
 
+      const employeeId = data[0].emp_id;
+
+      // Create employee-specific folders
+      const employeeFolderPath = `employees_info/${employeeId}`;
+      const profilePictureFolderPath = `${employeeFolderPath}/profile_picture`;
+      const kycDocumentsFolderPath = `${employeeFolderPath}/kyc_documents`;
+
+      // Create folders (this is a no-op if the folders already exist)
+      await supabase.storage.from('employees_info').upload(`${employeeId}/.keep`, new Blob(['']));
+      await supabase.storage.from('employees_info').upload(`${employeeId}/profile_picture/.keep`, new Blob(['']));
+      await supabase.storage.from('employees_info').upload(`${employeeId}/kyc_documents/.keep`, new Blob(['']));
+
       if (croppedImageUrl) {
-        const fileName = `${data[0].emp_id}.jpeg`;
+        const fileName = `profile_picture.jpeg`;
+        const filePath = `${profilePictureFolderPath}/${fileName}`;
         const { error: uploadError } = await supabase.storage
-          .from('profile-pictures')
-          .upload(fileName, croppedImageUrl);
+          .from('employees_info')
+          .upload(filePath, croppedImageUrl);
         if (uploadError) throw uploadError;
 
+        // Store the path in the storage_paths table
+        const { error: pathError } = await supabase
+          .from('storage_paths')
+          .insert({
+            emp_id: employeeId,
+            profile_picture_path: filePath,
+            kyc_documents_path: kycDocumentsFolderPath
+          });
+        if (pathError) throw pathError;
+
+        // Update the employee record with the profile picture path
         const { error: updateError } = await supabase
           .from('employees')
-          .update({ profile_picture: fileName })
-          .eq('emp_id', data[0].emp_id);
+          .update({ profile_picture: filePath })
+          .eq('emp_id', employeeId);
         if (updateError) throw updateError;
       }
 
@@ -288,7 +312,7 @@ const EmployeeManagement = () => {
               <Card key={employee.emp_id}>
                 <CardContent className="flex items-center space-x-4 p-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={employee.profile_picture ? `${supabase.storage.from('profile-pictures').getPublicUrl(employee.profile_picture).data.publicUrl}` : ''} alt={employee.name} />
+                    <AvatarImage src={employee.profile_picture ? `${supabase.storage.from('employees_info').getPublicUrl(employee.profile_picture).data.publicUrl}` : ''} alt={employee.name} />
                     <AvatarFallback>{employee.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
