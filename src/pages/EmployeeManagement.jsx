@@ -54,7 +54,7 @@ const EmployeeManagement = () => {
       console.log('Employee inserted successfully:', employeeData);
 
       // Step 2: Create folders in Supabase storage
-      const folderPath = `employees_info/${sanitizedEmpId}`;
+      const folderPath = `${sanitizedEmpId}`;
       const subFolders = ['profile_pic', 'kyc_documents'];
       for (const subFolder of subFolders) {
         const { error: folderError } = await supabase.storage
