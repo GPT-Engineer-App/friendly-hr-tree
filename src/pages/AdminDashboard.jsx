@@ -4,6 +4,7 @@ import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Users, Briefcase, LogOut } from 'lucide-react';
 
@@ -120,7 +121,9 @@ const UserManagement = () => {
                 checked={isAdmin}
                 onCheckedChange={(checked) => setIsAdmin(checked)}
               />
-              <label htmlFor="isAdmin">Admin</label>
+              <label htmlFor="isAdmin" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Admin
+              </label>
             </div>
             <Button type="submit">Create User</Button>
           </form>
