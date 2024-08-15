@@ -37,6 +37,8 @@ const UserManagement = () => {
   const [editEmail, setEditEmail] = useState('');
   const [editPassword, setEditPassword] = useState('');
   const [editIsAdmin, setEditIsAdmin] = useState(false);
+  const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
+  const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -111,6 +113,7 @@ const UserManagement = () => {
       toast.success('User updated successfully');
       fetchUsers();
       setEditingUser(null);
+      setIsUpdateDialogOpen(false);
     } catch (error) {
       toast.error('Error updating user: ' + error.message);
     }
@@ -176,13 +179,14 @@ const UserManagement = () => {
               <li key={user.id} className="flex items-center justify-between">
                 <span>{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
                 <div>
-                  <Dialog>
+                  <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
                     <DialogTrigger asChild>
                       <Button onClick={() => {
                         setEditingUser(user);
                         setEditEmail(user.email);
                         setEditPassword('');
                         setEditIsAdmin(user.app_metadata?.is_admin || false);
+                        setIsUpdateDialogOpen(true);
                       }}>
                         Update User
                       </Button>
@@ -230,11 +234,28 @@ const UserManagement = () => {
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="button" variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-                        <Button type="submit" onClick={updateUser}>Save changes</Button>
+                        <Button type="button" variant="outline" onClick={() => setIsUpdateDialogOpen(false)}>Cancel</Button>
+                        <Button type="button" onClick={() => setIsConfirmDialogOpen(true)}>Save changes</Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
+                  <AlertDialog open={isConfirmDialogOpen} onOpenChange={setIsConfirmDialogOpen}>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm User Update</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to update this user's information? This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => {
+                          setIsConfirmDialogOpen(false);
+                          updateUser();
+                        }}>Confirm</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive">Delete</Button>
