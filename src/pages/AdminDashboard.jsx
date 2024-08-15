@@ -114,6 +114,7 @@ const UserManagement = () => {
       fetchUsers();
       setEditingUser(null);
       setIsUpdateDialogOpen(false);
+      setIsConfirmDialogOpen(false);
     } catch (error) {
       toast.error('Error updating user: ' + error.message);
     }
@@ -202,22 +203,22 @@ const UserManagement = () => {
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor="editEmail" className="text-right">
+                          <label htmlFor={`editEmail-${user.id}`} className="text-right">
                             Email
                           </label>
                           <Input
-                            id="editEmail"
+                            id={`editEmail-${user.id}`}
                             value={editEmail}
                             onChange={(e) => setEditEmail(e.target.value)}
                             className="col-span-3"
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor="editPassword" className="text-right">
+                          <label htmlFor={`editPassword-${user.id}`} className="text-right">
                             New Password
                           </label>
                           <Input
-                            id="editPassword"
+                            id={`editPassword-${user.id}`}
                             type="password"
                             value={editPassword}
                             onChange={(e) => setEditPassword(e.target.value)}
@@ -226,11 +227,11 @@ const UserManagement = () => {
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
-                            id="editIsAdmin"
+                            id={`editIsAdmin-${user.id}`}
                             checked={editIsAdmin}
                             onCheckedChange={(checked) => setEditIsAdmin(checked)}
                           />
-                          <label htmlFor="editIsAdmin" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label htmlFor={`editIsAdmin-${user.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                             Admin
                           </label>
                         </div>
@@ -251,10 +252,7 @@ const UserManagement = () => {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setIsConfirmDialogOpen(false)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => {
-                          setIsConfirmDialogOpen(false);
-                          updateUser();
-                        }}>Confirm</AlertDialogAction>
+                        <AlertDialogAction onClick={updateUser}>Confirm</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
