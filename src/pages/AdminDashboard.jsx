@@ -105,7 +105,7 @@ const UserManagement = () => {
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
               required
-              autocomplete="off"
+              autoComplete="off"
             />
             <Input
               type="password"
@@ -113,7 +113,7 @@ const UserManagement = () => {
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
               required
-              autocomplete="off"
+              autoComplete="off"
             />
             <div className="flex items-center space-x-2">
               <Checkbox
