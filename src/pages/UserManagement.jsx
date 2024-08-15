@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Search } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,7 @@ import {
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -39,16 +40,25 @@ const UserManagement = () => {
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+  }, [searchTerm, users]);
 
   const fetchUsers = async () => {
     try {
       const { data, error } = await supabase.auth.admin.listUsers();
       if (error) throw error;
       setUsers(data.users);
+      setFilteredUsers(data.users);
     } catch (error) {
       toast.error('Error fetching users: ' + error.message);
     }
@@ -187,8 +197,18 @@ const UserManagement = () => {
           <CardTitle>User List</CardTitle>
         </CardHeader>
         <CardContent>
+          <div className="mb-4 relative">
+            <Input
+              type="text"
+              placeholder="Search users by email"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
           <ul className="space-y-2">
-            {users.map((user) => (
+            {filteredUsers.map((user) => (
               <li key={user.id} className="flex items-center justify-between">
                 <span>{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
                 <div>
