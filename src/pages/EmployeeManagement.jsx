@@ -368,7 +368,7 @@ const EmployeeManagement = () => {
                     <TableCell>{employee.designation}</TableCell>
                     <TableCell>{employee.email}</TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="sm" onClick={() => handleExpand(employee.emp_id)}>
+                      {/* Expand button removed */}
                         {expandedEmployee === employee.emp_id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => handleUpdate(employee)}>
