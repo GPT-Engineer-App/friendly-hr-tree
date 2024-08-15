@@ -25,6 +25,7 @@ const AdminWelcome = () => {
             <li>Enhanced user management features</li>
             <li>Improved overall application structure and navigation</li>
             <li>Updated user creation form with compact layout and password visibility toggle</li>
+<li>Added password visibility toggle to the edit user pop-up window</li>
           </ul>
         </CardContent>
       </Card>

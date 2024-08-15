@@ -227,13 +227,22 @@ const UserManagement = () => {
                           <label htmlFor={`editPassword-${user.id}`} className="text-right">
                             New Password
                           </label>
-                          <Input
-                            id={`editPassword-${user.id}`}
-                            type="password"
-                            value={editPassword}
-                            onChange={(e) => setEditPassword(e.target.value)}
-                            className="col-span-3"
-                          />
+                          <div className="col-span-3 relative">
+                            <Input
+                              id={`editPassword-${user.id}`}
+                              type={showPassword ? "text" : "password"}
+                              value={editPassword}
+                              onChange={(e) => setEditPassword(e.target.value)}
+                              className="pr-10"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPassword(!showPassword)}
+                              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Checkbox
