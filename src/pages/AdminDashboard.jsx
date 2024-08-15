@@ -141,6 +141,7 @@ const UserManagement = () => {
           <form onSubmit={createUser} className="space-y-4">
             <Input
               type="email"
+              id="newUserEmail"
               placeholder="Enter new user's email"
               value={newUserEmail}
               onChange={(e) => setNewUserEmail(e.target.value)}
@@ -149,6 +150,7 @@ const UserManagement = () => {
             />
             <Input
               type="password"
+              id="newUserPassword"
               placeholder="Enter new user's password"
               value={newUserPassword}
               onChange={(e) => setNewUserPassword(e.target.value)}
@@ -200,22 +202,22 @@ const UserManagement = () => {
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor="email" className="text-right">
+                          <label htmlFor="editEmail" className="text-right">
                             Email
                           </label>
                           <Input
-                            id="email"
+                            id="editEmail"
                             value={editEmail}
                             onChange={(e) => setEditEmail(e.target.value)}
                             className="col-span-3"
                           />
                         </div>
                         <div className="grid grid-cols-4 items-center gap-4">
-                          <label htmlFor="password" className="text-right">
+                          <label htmlFor="editPassword" className="text-right">
                             New Password
                           </label>
                           <Input
-                            id="password"
+                            id="editPassword"
                             type="password"
                             value={editPassword}
                             onChange={(e) => setEditPassword(e.target.value)}
