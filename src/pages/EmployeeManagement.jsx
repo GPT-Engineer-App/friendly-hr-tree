@@ -77,11 +77,10 @@ const EmployeeManagement = () => {
       if (error) throw error;
 
       const employeeId = data[0].emp_id;
-      const sanitizedEmpId = employeeId.replace(/\s+/g, '_').toLowerCase();
 
       // Create folders and upload profile picture
       if (profilePicture) {
-        const folderPath = `${sanitizedEmpId}`;
+        const folderPath = `${employeeId}`;
         const fileExt = profilePicture.name.split('.').pop();
         const filePath = `${folderPath}/profile_picture.${fileExt}`;
 
