@@ -237,14 +237,17 @@ const EmployeeManagement = () => {
                 onChange={handleInputChange}
                 required
               />
-              <Input
-                name="date_of_joining"
-                type="date"
-                placeholder="Date of Joining"
-                value={newEmployee.date_of_joining}
-                onChange={handleInputChange}
-                required
-              />
+              <div>
+                <Label htmlFor="date_of_joining">Date of Joining</Label>
+                <Input
+                  id="date_of_joining"
+                  name="date_of_joining"
+                  type="date"
+                  value={newEmployee.date_of_joining}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
               <Input
                 name="phone_no"
                 placeholder="Phone Number (10 digits)"
@@ -266,13 +269,16 @@ const EmployeeManagement = () => {
                 value={newEmployee.address}
                 onChange={handleInputChange}
               />
-              <Input
-                name="dob"
-                type="date"
-                placeholder="Date of Birth"
-                value={newEmployee.dob}
-                onChange={handleInputChange}
-              />
+              <div>
+                <Label htmlFor="dob">Date of Birth</Label>
+                <Input
+                  id="dob"
+                  name="dob"
+                  type="date"
+                  value={newEmployee.dob}
+                  onChange={handleInputChange}
+                />
+              </div>
               <Input
                 name="emergency_contact_no"
                 placeholder="Emergency Contact Number"
