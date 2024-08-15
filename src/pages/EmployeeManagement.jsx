@@ -68,13 +68,13 @@ const EmployeeManagement = () => {
         const filePath = `${folderPath}/profile_picture.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
-          .from('employees')
+          .from('employees_info')
           .upload(filePath, profilePicture);
 
         if (uploadError) throw uploadError;
 
         const { data: urlData } = supabase.storage
-          .from('employees')
+          .from('employees_info')
           .getPublicUrl(filePath);
 
         await supabase
