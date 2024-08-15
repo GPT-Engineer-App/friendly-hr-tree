@@ -40,6 +40,7 @@ const UserManagement = () => {
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
@@ -147,8 +148,8 @@ const UserManagement = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={createUser} className="space-y-4">
-            <div className="flex space-x-4">
-              <div className="flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="relative">
                 <Input
                   type="email"
                   id="newUserEmail"
@@ -159,7 +160,7 @@ const UserManagement = () => {
                   autoComplete="off"
                 />
               </div>
-              <div className="flex-1 relative">
+              <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
                   id="newUserPassword"
@@ -168,6 +169,7 @@ const UserManagement = () => {
                   onChange={(e) => setNewUserPassword(e.target.value)}
                   required
                   autoComplete="off"
+                  className="pr-10"
                 />
                 <button
                   type="button"
@@ -209,9 +211,9 @@ const UserManagement = () => {
           </div>
           <ul className="space-y-2">
             {filteredUsers.map((user) => (
-              <li key={user.id} className="flex items-center justify-between">
-                <span>{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
-                <div>
+              <li key={user.id} className="flex flex-col sm:flex-row sm:items-center justify-between">
+                <span className="mb-2 sm:mb-0">{user.email} {user.app_metadata?.is_admin ? '(Admin)' : ''}</span>
+                <div className="space-x-2">
                   <Dialog open={isUpdateDialogOpen} onOpenChange={setIsUpdateDialogOpen}>
                     <DialogTrigger asChild>
                       <Button onClick={() => {
@@ -221,7 +223,7 @@ const UserManagement = () => {
                         setEditIsAdmin(user.app_metadata?.is_admin || false);
                         setIsUpdateDialogOpen(true);
                       }}>
-                        Update User
+                        Update
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
@@ -250,17 +252,17 @@ const UserManagement = () => {
                           <div className="col-span-3 relative">
                             <Input
                               id={`editPassword-${user.id}`}
-                              type={showPassword ? "text" : "password"}
+                              type={showEditPassword ? "text" : "password"}
                               value={editPassword}
                               onChange={(e) => setEditPassword(e.target.value)}
                               className="pr-10"
                             />
                             <button
                               type="button"
-                              onClick={() => setShowPassword(!showPassword)}
+                              onClick={() => setShowEditPassword(!showEditPassword)}
                               className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
                             >
-                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </button>
                           </div>
                         </div>
