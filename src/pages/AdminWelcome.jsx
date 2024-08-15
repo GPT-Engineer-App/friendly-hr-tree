@@ -24,6 +24,7 @@ const AdminWelcome = () => {
             <li>Integrated logout functionality across all screens</li>
             <li>Enhanced user management features</li>
             <li>Improved overall application structure and navigation</li>
+            <li>Updated user creation form with compact layout and password visibility toggle</li>
           </ul>
         </CardContent>
       </Card>

@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { Eye, EyeOff } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ const UserManagement = () => {
   const [editIsAdmin, setEditIsAdmin] = useState(false);
   const [isUpdateDialogOpen, setIsUpdateDialogOpen] = useState(false);
   const [isConfirmDialogOpen, setIsConfirmDialogOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -135,24 +137,37 @@ const UserManagement = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={createUser} className="space-y-4">
-            <Input
-              type="email"
-              id="newUserEmail"
-              placeholder="Enter new user's email"
-              value={newUserEmail}
-              onChange={(e) => setNewUserEmail(e.target.value)}
-              required
-              autoComplete="off"
-            />
-            <Input
-              type="password"
-              id="newUserPassword"
-              placeholder="Enter new user's password"
-              value={newUserPassword}
-              onChange={(e) => setNewUserPassword(e.target.value)}
-              required
-              autoComplete="off"
-            />
+            <div className="flex space-x-4">
+              <div className="flex-1">
+                <Input
+                  type="email"
+                  id="newUserEmail"
+                  placeholder="Email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  required
+                  autoComplete="off"
+                />
+              </div>
+              <div className="flex-1 relative">
+                <Input
+                  type={showPassword ? "text" : "password"}
+                  id="newUserPassword"
+                  placeholder="Password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  required
+                  autoComplete="off"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="isAdmin"
