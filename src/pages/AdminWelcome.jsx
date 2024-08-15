@@ -19,9 +19,11 @@ const AdminWelcome = () => {
         </CardHeader>
         <CardContent>
           <ul className="list-disc pl-5">
-            <li>New user management features added</li>
-            <li>Employee data import tool now available</li>
-            <li>System maintenance scheduled for next weekend</li>
+            <li>Implemented admin dashboard with welcome screen</li>
+            <li>Added sidebar navigation for user and employee management</li>
+            <li>Integrated logout functionality across all screens</li>
+            <li>Enhanced user management features</li>
+            <li>Improved overall application structure and navigation</li>
           </ul>
         </CardContent>
       </Card>
