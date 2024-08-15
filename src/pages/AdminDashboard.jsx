@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import { Users, Briefcase, LogOut } from 'lucide-react';
+import { Users, Briefcase } from 'lucide-react';
+import Header from '../components/Header';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+
+const AdminDashboard = () => {
+  return (
+    <div className="min-h-screen bg-gray-100">
+      <Header />
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <UserManagement />
+      </main>
+    </div>
+  );
+};
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
