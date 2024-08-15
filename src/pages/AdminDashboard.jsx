@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import AdminWelcome from './AdminWelcome';
 import UserManagement from './UserManagement';
 import EmployeeManagement from './EmployeeManagement';
+import { Users, UserPlus, Home, Briefcase } from 'lucide-react';
 
 const AdminDashboard = () => {
   return (
@@ -22,7 +23,7 @@ const AdminDashboard = () => {
             <Users className="inline-block mr-2" size={20} /> User Management
           </Link>
           <Link to="/admin-dashboard/employee-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
-            <UserPlus className="inline-block mr-2" size={20} /> Employee Management
+            <Briefcase className="inline-block mr-2" size={20} /> Employee Management
           </Link>
         </nav>
       </aside>
