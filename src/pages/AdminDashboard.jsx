@@ -1,11 +1,10 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { Users, UserPlus, Home } from 'lucide-react';
+import { Users, Home, Briefcase } from 'lucide-react';
 import Header from '../components/Header';
 import AdminWelcome from './AdminWelcome';
 import UserManagement from './UserManagement';
 import EmployeeManagement from './EmployeeManagement';
-import { Users, UserPlus, Home, Briefcase } from 'lucide-react';
 
 const AdminDashboard = () => {
   return (
