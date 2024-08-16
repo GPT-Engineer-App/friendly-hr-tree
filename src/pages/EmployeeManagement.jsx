@@ -71,12 +71,12 @@ const EmployeeManagement = () => {
       // 2. Upload profile picture if provided
       if (profilePicture) {
         const fileExt = profilePicture.name.split('.').pop();
-        const fileName = `${newEmployee.emp_id}_profile_picture.${fileExt}`;
-        const filePath = `employee_documents/${fileName}`;
+        const formattedEmpId = newEmployee.emp_id.replace(/\//g, '_');
+        const fileName = `${formattedEmpId}/profile_picture.${fileExt}`;
 
         const { error: uploadError, data: uploadData } = await supabase.storage
           .from('employees_info')
-          .upload(filePath, profilePicture);
+          .upload(fileName, profilePicture);
 
         if (uploadError) {
           console.error('Upload error:', uploadError);
@@ -86,7 +86,7 @@ const EmployeeManagement = () => {
         // 3. Get the public URL of the uploaded file
         const { data: urlData } = supabase.storage
           .from('employees_info')
-          .getPublicUrl(filePath);
+          .getPublicUrl(fileName);
 
         // 4. Store the document information
         const { error: docError } = await supabase
@@ -325,7 +325,7 @@ const EmployeeManagement = () => {
                 employee.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 employee.email.toLowerCase().includes(searchTerm.toLowerCase())
               ).map((employee) => (
-                <TableRow key={employee.emp_id}>
+                <TableRow key={employee.id}>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.emp_id}</TableCell>
                   <TableCell>{employee.email}</TableCell>
