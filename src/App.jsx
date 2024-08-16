@@ -20,13 +20,19 @@ const App = () => {
           const { data, error } = await supabase
             .from('employees')
             .select('*, employee_documents(*)')
-            .eq('official_email', user.email)
-            .single();
+            .eq('official_email', user.email);
 
           if (error) throw error;
-          setEmployeeData(data);
+
+          if (data && data.length > 0) {
+            setEmployeeData(data[0]);
+          } else {
+            console.warn('No employee data found for the current user');
+            setEmployeeData(null);
+          }
         } catch (error) {
           console.error('Error fetching employee data:', error);
+          setEmployeeData(null);
         } finally {
           setLoadingEmployee(false);
         }
