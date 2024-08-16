@@ -13,7 +13,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
@@ -44,7 +43,7 @@ const UserManagement = () => {
     try {
       const { data, error } = await supabase
         .from('employees')
-        .select('emp_id, name, email')
+        .select('emp_id, name, official_email')
         .is('user_id', null);
       if (error) throw error;
       setEmployees(data);
@@ -57,8 +56,8 @@ const UserManagement = () => {
   const createUser = async (e) => {
     e.preventDefault();
     
-    if (!newUserEmail || !newUserPassword || !selectedEmployee) {
-      setErrorMessage('Please provide email, password, and select an employee');
+    if (!newUserPassword || !selectedEmployee) {
+      setErrorMessage('Please provide a password and select an employee');
       return;
     }
     
@@ -70,8 +69,15 @@ const UserManagement = () => {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
+      // Find the selected employee
+      const selectedEmployeeData = employees.find(emp => emp.emp_id === selectedEmployee);
+      if (!selectedEmployeeData) {
+        throw new Error('Selected employee not found');
+      }
+
+      // Create user with the employee's official email
       const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-        email: newUserEmail,
+        email: selectedEmployeeData.official_email,
         password: newUserPassword,
         email_confirm: true,
         user_metadata: { is_admin: isAdmin },
@@ -80,6 +86,7 @@ const UserManagement = () => {
 
       if (userError) throw userError;
 
+      // Update employee record with the new user_id
       const { error: employeeError } = await supabase
         .from('employees')
         .update({ user_id: userData.user.id })
@@ -90,7 +97,6 @@ const UserManagement = () => {
       toast.success('User created and associated with employee successfully');
       fetchUsers();
       fetchEmployees();
-      setNewUserEmail('');
       setNewUserPassword('');
       setSelectedEmployee('');
       setIsAdmin(false);
@@ -173,14 +179,19 @@ const UserManagement = () => {
               </div>
             )}
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newUserEmail}
-                onChange={(e) => setNewUserEmail(e.target.value)}
-                required
-              />
+              <Label htmlFor="employee">Associate Employee</Label>
+              <Select onValueChange={setSelectedEmployee} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an employee" />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.emp_id} value={employee.emp_id}>
+                      {employee.name} ({employee.official_email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
@@ -200,21 +211,6 @@ const UserManagement = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </div>
-            <div>
-              <Label htmlFor="employee">Associate Employee</Label>
-              <Select onValueChange={setSelectedEmployee} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((employee) => (
-                    <SelectItem key={employee.emp_id} value={employee.emp_id}>
-                      {employee.name} ({employee.email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div className="flex items-center">
               <input
