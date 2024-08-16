@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -14,6 +15,7 @@ const UserManagement = () => {
   const [newUserPassword, setNewUserPassword] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -69,6 +71,39 @@ const UserManagement = () => {
     } catch (error) {
       console.error('Error creating user:', error);
       toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
+    }
+  };
+
+  const handleEdit = (user) => {
+    setEditingUser(user);
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    try {
+      const { error } = await supabase.auth.admin.updateUserById(
+        editingUser.id,
+        { email: editingUser.email, app_metadata: { is_admin: editingUser.app_metadata.is_admin } }
+      );
+      if (error) throw error;
+      toast.success('User updated successfully');
+      fetchUsers();
+      setEditingUser(null);
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Error updating user: ' + error.message);
+    }
+  };
+
+  const handleDelete = async (userId) => {
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      toast.success('User deleted successfully');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Error deleting user: ' + error.message);
     }
   };
 
@@ -137,6 +172,7 @@ const UserManagement = () => {
               <TableRow>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,12 +180,53 @@ const UserManagement = () => {
                 <TableRow key={user.id}>
                   <TableCell>{user.email}</TableCell>
                   <TableCell>{user.app_metadata?.is_admin ? 'Admin' : 'User'}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEdit(user)} className="mr-2">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button onClick={() => handleDelete(user.id)} variant="destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+
+      {/* Edit User Dialog */}
+      {editingUser && (
+        <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div>
+                <Label htmlFor="editEmail">Email</Label>
+                <Input
+                  id="editEmail"
+                  type="email"
+                  value={editingUser.email}
+                  onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
+                  required
+                />
+              </div>
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="editIsAdmin"
+                  checked={editingUser.app_metadata?.is_admin}
+                  onChange={(e) => setEditingUser({...editingUser, app_metadata: {...editingUser.app_metadata, is_admin: e.target.checked}})}
+                />
+                <Label htmlFor="editIsAdmin">Is Admin</Label>
+              </div>
+              <Button type="submit">Update User</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
