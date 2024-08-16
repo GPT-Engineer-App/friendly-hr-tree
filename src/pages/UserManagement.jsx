@@ -82,7 +82,7 @@ const UserManagement = () => {
 
       const { error: employeeError } = await supabase
         .from('employees')
-        .update({ user_id: userData.user.id })
+        .update({ auth_user_id: userData.user.id })
         .eq('id', selectedEmployee);
 
       if (employeeError) throw employeeError;

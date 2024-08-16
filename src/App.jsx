@@ -20,7 +20,7 @@ const App = () => {
           const { data, error } = await supabase
             .from('employees')
             .select('*')
-            .eq('user_id', user.id)
+            .eq('auth_user_id', user.id)
             .single();
 
           if (error) throw error;

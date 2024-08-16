@@ -38,6 +38,9 @@ const fromSupabase = async (query) => {
 | updated_at           | timestamp with time zone | string    | false    |
 | created_by           | character varying(100)   | string    | false    |
 | updated_by           | character varying(100)   | string    | false    |
+| auth_user_id         | uuid                     | string    | false    |
+
+Note: The `auth_user_id` column is a foreign key that references the `id` column in the `auth.users` table.
 
 ### documents
 
