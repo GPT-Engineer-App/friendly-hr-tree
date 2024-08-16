@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { Search, Check, X, Eye } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Link } from 'react-router-dom';
 
 const documentTypes = {
   aadhar: 'Aadhar Card',
@@ -20,26 +21,25 @@ const documentTypes = {
 };
 
 const KYCApproval = () => {
-  const [documents, setDocuments] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
 
   useEffect(() => {
-    fetchDocuments();
+    fetchEmployees();
   }, []);
 
-  const fetchDocuments = async () => {
+  const fetchEmployees = async () => {
     try {
       const { data, error } = await supabase
-        .from('employee_documents')
-        .select('*, employees(name, emp_id)')
-        .eq('status', 'pending');
+        .from('employees')
+        .select('*');
 
       if (error) throw error;
-      setDocuments(data || []);
+      setEmployees(data || []);
     } catch (error) {
-      console.error('Error fetching documents:', error);
-      toast.error('Failed to fetch documents for approval');
+      console.error('Error fetching employees:', error);
+      toast.error('Failed to fetch employees');
     }
   };
 
@@ -47,42 +47,10 @@ const KYCApproval = () => {
     setSearchTerm(e.target.value);
   };
 
-  const filteredDocuments = documents.filter(doc =>
-    doc.employees.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    doc.employees.emp_id.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredEmployees = employees.filter(emp =>
+    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  const handleApprove = async (documentId) => {
-    try {
-      const { error } = await supabase
-        .from('employee_documents')
-        .update({ status: 'approved' })
-        .eq('id', documentId);
-
-      if (error) throw error;
-      toast.success('Document approved successfully');
-      fetchDocuments();
-    } catch (error) {
-      console.error('Error approving document:', error);
-      toast.error('Failed to approve document');
-    }
-  };
-
-  const handleReject = async (documentId) => {
-    try {
-      const { error } = await supabase
-        .from('employee_documents')
-        .update({ status: 'rejected' })
-        .eq('id', documentId);
-
-      if (error) throw error;
-      toast.success('Document rejected');
-      fetchDocuments();
-    } catch (error) {
-      console.error('Error rejecting document:', error);
-      toast.error('Failed to reject document');
-    }
-  };
 
   return (
     <div className="p-4">
@@ -102,47 +70,24 @@ const KYCApproval = () => {
           <TableRow>
             <TableHead>Employee Name</TableHead>
             <TableHead>Employee ID</TableHead>
-            <TableHead>Document Type</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredDocuments.map((doc) => (
-            <TableRow key={doc.id}>
-              <TableCell>{doc.employees.name}</TableCell>
-              <TableCell>{doc.employees.emp_id}</TableCell>
-              <TableCell>{documentTypes[doc.document_type]}</TableCell>
+          {filteredEmployees.map((emp) => (
+            <TableRow key={emp.id}>
+              <TableCell>{emp.name}</TableCell>
               <TableCell>
-                <div className="flex space-x-2">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" onClick={() => setSelectedDocument(doc)}>
-                        <Eye className="h-4 w-4 mr-2" /> View
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[425px]">
-                      <DialogHeader>
-                        <DialogTitle>Document Preview</DialogTitle>
-                      </DialogHeader>
-                      {selectedDocument && (
-                        <div className="mt-2">
-                          <iframe
-                            src={selectedDocument.document_url}
-                            title="Document Preview"
-                            width="100%"
-                            height="500px"
-                          />
-                        </div>
-                      )}
-                    </DialogContent>
-                  </Dialog>
-                  <Button onClick={() => handleApprove(doc.id)} className="bg-green-500 hover:bg-green-600">
-                    <Check className="h-4 w-4 mr-2" /> Approve
+                <Link to={`/admin/kyc-approval/${emp.emp_id}`} className="text-blue-600 hover:underline">
+                  {emp.emp_id}
+                </Link>
+              </TableCell>
+              <TableCell>
+                <Link to={`/admin/kyc-approval/${emp.emp_id}`}>
+                  <Button variant="outline">
+                    <Eye className="h-4 w-4 mr-2" /> View Documents
                   </Button>
-                  <Button onClick={() => handleReject(doc.id)} variant="destructive">
-                    <X className="h-4 w-4 mr-2" /> Reject
-                  </Button>
-                </div>
+                </Link>
               </TableCell>
             </TableRow>
           ))}

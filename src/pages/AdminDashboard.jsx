@@ -6,6 +6,7 @@ import AdminWelcome from './AdminWelcome';
 import UserManagement from './UserManagement';
 import EmployeeManagement from './EmployeeManagement';
 import KYCApproval from './KYCApproval';
+import EmployeeKYCApproval from './EmployeeKYCApproval';
 
 const AdminDashboard = () => {
   return (
@@ -40,6 +41,7 @@ const AdminDashboard = () => {
             <Route path="/user-management" element={<UserManagement />} />
             <Route path="/employee-management" element={<EmployeeManagement />} />
             <Route path="/kyc-approval" element={<KYCApproval />} />
+            <Route path="/kyc-approval/:empId" element={<EmployeeKYCApproval />} />
           </Routes>
         </main>
       </div>
