@@ -19,9 +19,9 @@ const LoginPage = () => {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (user.app_metadata.is_admin) {
-        navigate('/admin-dashboard');
+        navigate('/admin');
       } else {
-        navigate('/user-dashboard');
+        navigate('/user');
       }
     } catch (error) {
       toast.error(error.message);

@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User, Calendar, FileText, TrendingUp, Bell } from 'lucide-react';
+import { User, Calendar, FileText, TrendingUp, Bell, ChevronDown, ChevronUp } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const EmployeeInfo = ({ employeeData }) => {
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
   const profilePicture = employeeData.employee_documents?.find(doc => doc.document_type === 'profile_picture')?.document_url;
+
+  const toggleMoreInfo = () => setShowMoreInfo(!showMoreInfo);
 
   return (
     <div className="px-4 py-6 sm:px-0">
@@ -22,6 +27,28 @@ const EmployeeInfo = ({ employeeData }) => {
             <p>Name: {employeeData.name}</p>
             <p>Email: {employeeData.official_email}</p>
             <p>Department: {employeeData.designation}</p>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="mt-4">
+                  {showMoreInfo ? <ChevronUp className="mr-2 h-4 w-4" /> : <ChevronDown className="mr-2 h-4 w-4" />}
+                  {showMoreInfo ? "Show Less" : "Show More"}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Detailed Employee Information</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <p>Employee ID: {employeeData.emp_id}</p>
+                  <p>Personal Email: {employeeData.email}</p>
+                  <p>Phone: {employeeData.phone_no}</p>
+                  <p>Date of Birth: {employeeData.dob}</p>
+                  <p>Date of Joining: {employeeData.date_of_joining}</p>
+                  <p>Address: {employeeData.address}</p>
+                  <p>Emergency Contact: {employeeData.emergency_contact_no}</p>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
         <Card>
