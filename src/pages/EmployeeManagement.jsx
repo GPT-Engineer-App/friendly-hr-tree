@@ -49,6 +49,7 @@ const EmployeeManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Input validation
       if (!newEmployee.emp_id || !newEmployee.name || !newEmployee.email) {
         throw new Error("Employee ID, Name, and Email are required fields.");
       }
@@ -64,29 +65,16 @@ const EmployeeManagement = () => {
         throw new Error(`Error creating employee: ${employeeError.message}`);
       }
 
-      const employeeId = employeeData[0].emp_id;
+      // Optimistic update
+      setEmployees(prevEmployees => [...prevEmployees, employeeData[0]]);
 
-      // 2. Create folder reference in storage_paths
-      const folderPath = employeeId.replace(/\//g, '_');
-      const { error: storagePathError } = await supabase
-        .from('storage_paths')
-        .insert([{ 
-          emp_id: employeeId, 
-          folder_path: folderPath,
-          folder_type: 'employee'
-        }]);
-
-      if (storagePathError) {
-        console.error('Storage path error:', storagePathError);
-        throw new Error(`Error creating storage path: ${storagePathError.message}`);
-      }
-
-      // 3. Upload profile picture if provided
+      // 2. Upload profile picture if provided
       if (profilePicture) {
         const fileExt = profilePicture.name.split('.').pop();
-        const filePath = `${folderPath}/profile_picture.${fileExt}`;
+        const fileName = `${newEmployee.emp_id}_profile_picture.${fileExt}`;
+        const filePath = `employee_documents/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('employees_info')
           .upload(filePath, profilePicture);
 
@@ -95,21 +83,18 @@ const EmployeeManagement = () => {
           throw new Error(`Error uploading profile picture: ${uploadError.message}`);
         }
 
-        // 4. Get the public URL of the uploaded file
+        // 3. Get the public URL of the uploaded file
         const { data: urlData } = supabase.storage
           .from('employees_info')
           .getPublicUrl(filePath);
 
-        // 5. Store the URL in employee_documents
+        // 4. Store the document information
         const { error: docError } = await supabase
           .from('employee_documents')
           .insert({
-            emp_id: employeeId,
-            file_name: 'profile_picture',
-            file_path: filePath,
-            file_type: fileExt,
-            uploaded_by: 'system',
-            file_url: urlData.publicUrl
+            emp_id: newEmployee.emp_id,
+            document_type: 'profile_picture',
+            document_url: urlData.publicUrl
           });
 
         if (docError) {
@@ -119,7 +104,7 @@ const EmployeeManagement = () => {
       }
 
       toast.success('Employee added successfully');
-      fetchEmployees();
+      fetchEmployees(); // Refresh the list to ensure consistency
       setNewEmployee({
         emp_id: '',
         name: '',
@@ -163,9 +148,15 @@ const EmployeeManagement = () => {
 
       if (error) throw error;
 
+      // Optimistic update
+      setEmployees(prevEmployees => 
+        prevEmployees.map(emp => 
+          emp.emp_id === editingEmployee.emp_id ? editingEmployee : emp
+        )
+      );
+
       toast.success('Employee updated successfully');
       setEditingEmployee(null);
-      fetchEmployees();
     } catch (error) {
       toast.error('Error updating employee: ' + error.message);
     }
@@ -180,8 +171,10 @@ const EmployeeManagement = () => {
 
       if (error) throw error;
 
+      // Optimistic update
+      setEmployees(prevEmployees => prevEmployees.filter(emp => emp.emp_id !== empId));
+
       toast.success('Employee deleted successfully');
-      fetchEmployees();
     } catch (error) {
       toast.error('Error deleting employee: ' + error.message);
     }
@@ -327,7 +320,11 @@ const EmployeeManagement = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {employees.map((employee) => (
+              {employees.filter(employee =>
+                employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                employee.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map((employee) => (
                 <TableRow key={employee.emp_id}>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.emp_id}</TableCell>
