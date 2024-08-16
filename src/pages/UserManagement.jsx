@@ -21,10 +21,11 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data, error } = await supabase.from('users').select('*');
+      const { data: { users }, error } = await supabase.auth.admin.listUsers();
       if (error) throw error;
-      setUsers(data);
+      setUsers(users);
     } catch (error) {
+      console.error('Error fetching users:', error);
       toast.error('Error fetching users: ' + error.message);
     }
   };
