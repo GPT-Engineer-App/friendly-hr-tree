@@ -291,7 +291,11 @@ const EmployeeManagement = () => {
             <TableBody>
               {filteredEmployees.map((employee) => (
                 <TableRow key={employee.emp_id}>
-                  <TableCell>{employee.emp_id}</TableCell>
+                  <TableCell>
+  <Link to={`/admin/employee-documents/${employee.emp_id}`} className="text-blue-600 hover:underline">
+    {employee.emp_id}
+  </Link>
+</TableCell>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
