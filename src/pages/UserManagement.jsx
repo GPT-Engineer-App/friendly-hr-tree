@@ -8,20 +8,25 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, EyeOff, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [employees, setEmployees] = useState([]);
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
+  const [selectedEmployee, setSelectedEmployee] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [editPassword, setEditPassword] = useState('');
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetchUsers();
+    fetchEmployees();
   }, []);
 
   const fetchUsers = async () => {
@@ -35,13 +40,25 @@ const UserManagement = () => {
     }
   };
 
-  const [errorMessage, setErrorMessage] = useState('');
+  const fetchEmployees = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('emp_id, name, email')
+        .is('user_id', null);
+      if (error) throw error;
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error fetching employees:', error);
+      toast.error('Error fetching employees: ' + error.message);
+    }
+  };
 
   const createUser = async (e) => {
     e.preventDefault();
     
-    if (!newUserEmail || !newUserPassword) {
-      setErrorMessage('Please provide both email and password');
+    if (!newUserEmail || !newUserPassword || !selectedEmployee) {
+      setErrorMessage('Please provide email, password, and select an employee');
       return;
     }
     
@@ -53,7 +70,7 @@ const UserManagement = () => {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      const { data, error } = await supabase.auth.admin.createUser({
+      const { data: userData, error: userError } = await supabase.auth.admin.createUser({
         email: newUserEmail,
         password: newUserPassword,
         email_confirm: true,
@@ -61,12 +78,21 @@ const UserManagement = () => {
         app_metadata: { is_admin: isAdmin }
       });
 
-      if (error) throw error;
+      if (userError) throw userError;
 
-      toast.success('User created successfully');
+      const { error: employeeError } = await supabase
+        .from('employees')
+        .update({ user_id: userData.user.id })
+        .eq('emp_id', selectedEmployee);
+
+      if (employeeError) throw employeeError;
+
+      toast.success('User created and associated with employee successfully');
       fetchUsers();
+      fetchEmployees();
       setNewUserEmail('');
       setNewUserPassword('');
+      setSelectedEmployee('');
       setIsAdmin(false);
     } catch (error) {
       console.error('Error creating user:', error);
@@ -105,10 +131,19 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userId);
-      if (error) throw error;
-      toast.success('User deleted successfully');
+      const { error: employeeError } = await supabase
+        .from('employees')
+        .update({ user_id: null })
+        .eq('user_id', userId);
+
+      if (employeeError) throw employeeError;
+
+      const { error: userError } = await supabase.auth.admin.deleteUser(userId);
+      if (userError) throw userError;
+
+      toast.success('User deleted and employee association removed successfully');
       fetchUsers();
+      fetchEmployees();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Error deleting user: ' + error.message);
@@ -125,12 +160,12 @@ const UserManagement = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={createUser} className="space-y-4">
-  {errorMessage && (
-    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-      <strong className="font-bold">Error: </strong>
-      <span className="block sm:inline">{errorMessage}</span>
-    </div>
-  )}
+            {errorMessage && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{errorMessage}</span>
+              </div>
+            )}
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
@@ -159,6 +194,21 @@ const UserManagement = () => {
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+            </div>
+            <div>
+              <Label htmlFor="employee">Associate Employee</Label>
+              <Select onValueChange={setSelectedEmployee} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select an employee" />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.emp_id} value={employee.emp_id}>
+                      {employee.name} ({employee.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center">
               <input
