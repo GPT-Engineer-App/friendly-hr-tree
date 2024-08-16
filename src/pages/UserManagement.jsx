@@ -8,13 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Eye, EyeOff, Edit, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
-  const [employees, setEmployees] = useState([]);
+  const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPassword, setNewUserPassword] = useState('');
-  const [selectedEmployee, setSelectedEmployee] = useState('');
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
@@ -25,7 +23,6 @@ const UserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-    fetchEmployees();
   }, []);
 
   const fetchUsers = async () => {
@@ -39,25 +36,11 @@ const UserManagement = () => {
     }
   };
 
-  const fetchEmployees = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('emp_id, name, official_email')
-        .is('user_id', null);
-      if (error) throw error;
-      setEmployees(data);
-    } catch (error) {
-      console.error('Error fetching employees:', error);
-      toast.error('Error fetching employees: ' + error.message);
-    }
-  };
-
   const createUser = async (e) => {
     e.preventDefault();
     
-    if (!newUserPassword || !selectedEmployee) {
-      setErrorMessage('Please provide a password and select an employee');
+    if (!newUserEmail || !newUserPassword) {
+      setErrorMessage('Please provide both email and password');
       return;
     }
     
@@ -69,15 +52,8 @@ const UserManagement = () => {
     setIsSubmitting(true);
     setErrorMessage('');
     try {
-      // Find the selected employee
-      const selectedEmployeeData = employees.find(emp => emp.emp_id === selectedEmployee);
-      if (!selectedEmployeeData) {
-        throw new Error('Selected employee not found');
-      }
-
-      // Create user with the employee's official email
       const { data: userData, error: userError } = await supabase.auth.admin.createUser({
-        email: selectedEmployeeData.official_email,
+        email: newUserEmail,
         password: newUserPassword,
         email_confirm: true,
         user_metadata: { is_admin: isAdmin },
@@ -86,19 +62,10 @@ const UserManagement = () => {
 
       if (userError) throw userError;
 
-      // Update employee record with the new user_id
-      const { error: employeeError } = await supabase
-        .from('employees')
-        .update({ user_id: userData.user.id })
-        .eq('emp_id', selectedEmployee);
-
-      if (employeeError) throw employeeError;
-
-      toast.success('User created and associated with employee successfully');
+      toast.success('User created successfully');
       fetchUsers();
-      fetchEmployees();
+      setNewUserEmail('');
       setNewUserPassword('');
-      setSelectedEmployee('');
       setIsAdmin(false);
     } catch (error) {
       console.error('Error creating user:', error);
@@ -137,25 +104,10 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      const { error: employeeError } = await supabase
-        .from('employees')
-        .update({ user_id: null })
-        .eq('user_id', userId);
-
-      if (employeeError) {
-        console.error('Error updating employee:', employeeError);
-        // If the error is due to no matching rows, we can ignore it
-        if (employeeError.code !== 'PGRST116') {
-          throw employeeError;
-        }
-      }
-
-      const { error: userError } = await supabase.auth.admin.deleteUser(userId);
-      if (userError) throw userError;
-
-      toast.success('User deleted and employee association removed successfully');
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      toast.success('User deleted successfully');
       fetchUsers();
-      fetchEmployees();
     } catch (error) {
       console.error('Error deleting user:', error);
       toast.error('Error deleting user: ' + error.message);
@@ -179,19 +131,14 @@ const UserManagement = () => {
               </div>
             )}
             <div>
-              <Label htmlFor="employee">Associate Employee</Label>
-              <Select onValueChange={setSelectedEmployee} required>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an employee" />
-                </SelectTrigger>
-                <SelectContent>
-                  {employees.map((employee) => (
-                    <SelectItem key={employee.emp_id} value={employee.emp_id}>
-                      {employee.name} ({employee.official_email})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                required
+              />
             </div>
             <div>
               <Label htmlFor="password">Password</Label>
