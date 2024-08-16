@@ -102,6 +102,10 @@ const UserManagement = () => {
         return;
       }
 
+      if (!data || !data.user) {
+        throw new Error('User data not returned from Supabase');
+      }
+
       const { error: updateError } = await supabase.auth.admin.updateUserById(
         data.user.id,
         { app_metadata: { is_admin: isAdmin } }
