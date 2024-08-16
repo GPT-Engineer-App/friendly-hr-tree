@@ -64,7 +64,12 @@ const EmployeeManagement = () => {
         .insert([newEmployee])
         .select();
 
-      if (employeeError) throw employeeError;
+      if (employeeError) {
+        if (employeeError.code === '23505') {
+          throw new Error("An employee with this Employee ID or Email already exists. Please use a unique Employee ID and Email.");
+        }
+        throw employeeError;
+      }
 
       if (profilePicture) {
         const fileExt = profilePicture.name.split('.').pop();
@@ -105,7 +110,8 @@ const EmployeeManagement = () => {
       });
       setProfilePicture(null);
     } catch (error) {
-      toast.error('Error adding employee: ' + error.message);
+      console.error('Error adding employee:', error);
+      toast.error(error.message || 'An unexpected error occurred while adding the employee. Please try again.');
     }
   };
 
@@ -170,7 +176,8 @@ const EmployeeManagement = () => {
       setEditingEmployee(null);
       setEditProfilePicture(null);
     } catch (error) {
-      toast.error('Error updating employee: ' + error.message);
+      console.error('Error updating employee:', error);
+      toast.error(error.message || 'An unexpected error occurred while updating the employee. Please try again.');
     }
   };
 
@@ -187,7 +194,8 @@ const EmployeeManagement = () => {
 
       toast.success('Employee deleted successfully');
     } catch (error) {
-      toast.error('Error deleting employee: ' + error.message);
+      console.error('Error deleting employee:', error);
+      toast.error(error.message || 'An unexpected error occurred while deleting the employee. Please try again.');
     }
   };
 
