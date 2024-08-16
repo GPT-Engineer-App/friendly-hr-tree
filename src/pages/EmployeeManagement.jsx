@@ -19,6 +19,7 @@ const EmployeeManagement = () => {
     date_of_joining: '',
     phone_no: '',
     email: '',
+    official_email: '',
     address: '',
     dob: '',
     emergency_contact_no: ''
@@ -243,8 +244,12 @@ const EmployeeManagement = () => {
                 <Input id="phone_no" name="phone_no" value={newEmployee.phone_no} onChange={handleInputChange} />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Personal Email</Label>
                 <Input id="email" name="email" type="email" value={newEmployee.email} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="official_email">Official Email</Label>
+                <Input id="official_email" name="official_email" type="email" value={newEmployee.official_email} onChange={handleInputChange} required />
               </div>
               <div className="md:col-span-2">
                 <Label htmlFor="address">Address</Label>

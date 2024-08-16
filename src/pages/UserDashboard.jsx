@@ -3,7 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Calendar, FileText, TrendingUp, Bell } from 'lucide-react';
 import Header from '../components/Header';
 
-const UserDashboard = () => {
+const UserDashboard = ({ employeeData }) => {
+  const profilePicture = employeeData.employee_documents?.find(doc => doc.document_type === 'profile_picture')?.document_url;
+
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -17,9 +19,12 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Name: John Doe</p>
-                <p>Email: john.doe@example.com</p>
-                <p>Department: IT</p>
+                {profilePicture && (
+                  <img src={profilePicture} alt="Profile" className="w-32 h-32 rounded-full mb-4 mx-auto object-cover" />
+                )}
+                <p>Name: {employeeData.name}</p>
+                <p>Email: {employeeData.official_email}</p>
+                <p>Department: {employeeData.designation}</p>
               </CardContent>
             </Card>
             <Card>
@@ -29,9 +34,9 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Present Days: 22</p>
-                <p>Absent Days: 1</p>
-                <p>Leave Balance: 10 days</p>
+                <p>Present Days: N/A</p>
+                <p>Absent Days: N/A</p>
+                <p>Leave Balance: N/A</p>
               </CardContent>
             </Card>
             <Card>
@@ -41,9 +46,9 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Pending: 2</p>
-                <p>Approved: 5</p>
-                <p>Rejected: 0</p>
+                <p>Pending: N/A</p>
+                <p>Approved: N/A</p>
+                <p>Rejected: N/A</p>
               </CardContent>
             </Card>
             <Card>
@@ -53,9 +58,9 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Performance Score: 85%</p>
-                <p>Goals Achieved: 4/5</p>
-                <p>Next Review: 15 days</p>
+                <p>Performance Score: N/A</p>
+                <p>Goals Achieved: N/A</p>
+                <p>Next Review: N/A</p>
               </CardContent>
             </Card>
             <Card>
@@ -65,11 +70,7 @@ const UserDashboard = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ul>
-                  <li>Team Meeting - 2 days</li>
-                  <li>Project Deadline - 1 week</li>
-                  <li>Company Picnic - 2 weeks</li>
-                </ul>
+                <p>No upcoming events</p>
               </CardContent>
             </Card>
           </div>
