@@ -26,9 +26,9 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
-      const { data: { users }, error } = await supabase.auth.admin.listUsers();
+      const { data, error } = await supabase.from('users').select('*');
       if (error) throw error;
-      setUsers(users);
+      setUsers(data);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast.error('Error fetching users: ' + error.message);
@@ -50,41 +50,17 @@ const UserManagement = () => {
 
     setIsSubmitting(true);
     try {
-      const { data, error } = await supabase.auth.admin.createUser({
+      const { data, error } = await supabase.auth.signUp({
         email: newUserEmail,
         password: newUserPassword,
-        email_confirm: true
-      });
-      if (error) {
-        console.error('Supabase error:', error);
-        if (error.message && error.message.toLowerCase().includes('already been registered')) {
-          toast.error('A user with this email already exists. Please use a different email address.');
-        } else if (error.status === 422) {
-          if (error.message && error.message.toLowerCase().includes('password')) {
-            toast.error('Invalid password: The password should be at least 6 characters long.');
-          } else {
-            toast.error('Invalid input: Please check the email and password.');
+        options: {
+          data: {
+            is_admin: isAdmin
           }
-        } else if (error.status === 403) {
-          toast.error('You do not have permission to create users. Please contact your administrator.');
-        } else {
-          toast.error('An error occurred while creating the user. Please try again.');
         }
-        return;
-      }
+      });
 
-      if (!data || !data.user) {
-        throw new Error('User data not returned from Supabase');
-      }
-
-      const { error: updateError } = await supabase.auth.admin.updateUserById(
-        data.user.id,
-        { app_metadata: { is_admin: isAdmin } }
-      );
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
-      }
+      if (error) throw error;
 
       toast.success('User created successfully');
       fetchUsers();
@@ -96,15 +72,172 @@ const UserManagement = () => {
       if (error.message && error.message.toLowerCase().includes('already been registered')) {
         toast.error('A user with this email already exists. Please use a different email address.');
       } else {
-        toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
+        toast.error('Error creating user: ' + error.message);
       }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // ... rest of the component code ...
+  const handleEditUser = (user) => {
+    setEditingUser(user);
+    setEditPassword('');
+  };
 
+  const handleUpdateUser = async () => {
+    try {
+      const updates = {};
+      if (editPassword) {
+        updates.password = editPassword;
+      }
+      const { error } = await supabase.auth.admin.updateUserById(editingUser.id, updates);
+      if (error) throw error;
+      toast.success('User updated successfully');
+      setEditingUser(null);
+      fetchUsers();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Error updating user: ' + error.message);
+    }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+      if (error) throw error;
+      toast.success('User deleted successfully');
+      fetchUsers();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Error deleting user: ' + error.message);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">User Management</h2>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Add New User</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={createUser} className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newUserEmail}
+                onChange={(e) => setNewUserEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isAdmin"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+                className="mr-2"
+              />
+              <Label htmlFor="isAdmin">Is Admin</Label>
+            </div>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating...' : 'Create User'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>User List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {users.map((user) => (
+                <TableRow key={user.id}>
+                  <TableCell>{user.email}</TableCell>
+                  <TableCell>{user.is_admin ? 'Admin' : 'User'}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleEditUser(user)} className="mr-2">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button onClick={() => handleDeleteUser(user.id)} variant="destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {editingUser && (
+        <Dialog open={!!editingUser} onOpenChange={() => setEditingUser(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }} className="space-y-4">
+              <div>
+                <Label htmlFor="editEmail">Email</Label>
+                <Input id="editEmail" type="email" value={editingUser.email} disabled />
+              </div>
+              <div>
+                <Label htmlFor="editPassword">New Password (leave blank to keep current)</Label>
+                <div className="relative">
+                  <Input
+                    id="editPassword"
+                    type={showEditPassword ? "text" : "password"}
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+              <Button type="submit">Update User</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
+  );
 };
 
 export default UserManagement;
