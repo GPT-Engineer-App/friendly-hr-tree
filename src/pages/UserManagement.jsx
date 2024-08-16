@@ -16,6 +16,8 @@ const UserManagement = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
+const [editPassword, setEditPassword] = useState('');
+const [showEditPassword, setShowEditPassword] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -75,20 +77,39 @@ const UserManagement = () => {
   };
 
   const handleEdit = (user) => {
-    setEditingUser(user);
+    setEditingUser({
+      ...user,
+      originalEmail: user.email,
+      originalIsAdmin: user.app_metadata?.is_admin
+    });
+    setEditPassword('');
   };
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      const { error } = await supabase.auth.admin.updateUserById(
-        editingUser.id,
-        { email: editingUser.email, app_metadata: { is_admin: editingUser.app_metadata.is_admin } }
-      );
+      const updates = {};
+      if (editingUser.email !== editingUser.originalEmail) {
+        updates.email = editingUser.email;
+      }
+      if (editingUser.app_metadata.is_admin !== editingUser.originalIsAdmin) {
+        updates.app_metadata = { is_admin: editingUser.app_metadata.is_admin };
+      }
+      if (editPassword) {
+        updates.password = editPassword;
+      }
+
+      if (Object.keys(updates).length === 0) {
+        toast.info('No changes to update');
+        return;
+      }
+
+      const { error } = await supabase.auth.admin.updateUserById(editingUser.id, updates);
       if (error) throw error;
       toast.success('User updated successfully');
       fetchUsers();
       setEditingUser(null);
+      setEditPassword('');
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error('Error updating user: ' + error.message);
@@ -212,6 +233,24 @@ const UserManagement = () => {
                   onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
                   required
                 />
+              </div>
+              <div>
+                <Label htmlFor="editPassword">New Password (optional)</Label>
+                <div className="relative">
+                  <Input
+                    id="editPassword"
+                    type={showEditPassword ? "text" : "password"}
+                    value={editPassword}
+                    onChange={(e) => setEditPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowEditPassword(!showEditPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5"
+                  >
+                    {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <input
