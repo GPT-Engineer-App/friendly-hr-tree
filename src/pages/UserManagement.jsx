@@ -38,7 +38,6 @@ const UserManagement = () => {
   const createUser = async (e) => {
     e.preventDefault();
     
-    // Basic client-side validation
     if (!newUserEmail || !newUserPassword) {
       toast.error('Please provide both email and password');
       return;
@@ -60,11 +59,15 @@ const UserManagement = () => {
         if (error.status === 422) {
           if (error.message.includes('already exists')) {
             toast.error('A user with this email already exists. Please use a different email address.');
+          } else if (error.message.includes('password')) {
+            toast.error('Invalid password: The password should be at least 6 characters long.');
           } else {
-            toast.error('Invalid input: Please check the email and password. The password should be at least 6 characters long.');
+            toast.error('Invalid input: Please check the email and password.');
           }
+        } else if (error.message.includes('duplicate key')) {
+          toast.error('A user with this email already exists. Please use a different email address.');
         } else {
-          throw error;
+          toast.error('An error occurred while creating the user. Please try again.');
         }
         return;
       }
