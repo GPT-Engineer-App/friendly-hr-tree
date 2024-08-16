@@ -31,6 +31,7 @@ const EmployeeManagement = () => {
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [editProfilePicture, setEditProfilePicture] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -147,6 +148,46 @@ const EmployeeManagement = () => {
     employee.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleEditEmployee = (employee) => {
+    setEditingEmployee({ ...employee });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdateEmployee = async () => {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .update(editingEmployee)
+        .eq('id', editingEmployee.id);
+
+      if (error) throw error;
+
+      toast.success('Employee updated successfully');
+      setIsEditDialogOpen(false);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Error updating employee:', error);
+      toast.error('Error updating employee: ' + error.message);
+    }
+  };
+
+  const handleDeleteEmployee = async (id) => {
+    try {
+      const { error } = await supabase
+        .from('employees')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success('Employee deleted successfully');
+      fetchEmployees();
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      toast.error('Error deleting employee: ' + error.message);
+    }
+  };
+
   return (
     <div className="p-4">
       <h2 className="text-2xl font-bold mb-4">Employee Management</h2>
@@ -249,7 +290,7 @@ const EmployeeManagement = () => {
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
                   <TableCell>
-                    <Button onClick={() => setEditingEmployee(employee)} className="mr-2">
+                    <Button onClick={() => handleEditEmployee(employee)} className="mr-2">
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="destructive" onClick={() => handleDeleteEmployee(employee.id)}>
@@ -263,7 +304,62 @@ const EmployeeManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Add edit employee dialog here if needed */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+          </DialogHeader>
+          {editingEmployee && (
+            <form onSubmit={(e) => { e.preventDefault(); handleUpdateEmployee(); }} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_emp_id">Employee ID</Label>
+                  <Input id="edit_emp_id" name="emp_id" value={editingEmployee.emp_id} onChange={(e) => setEditingEmployee({...editingEmployee, emp_id: e.target.value})} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit_name">Name</Label>
+                  <Input id="edit_name" name="name" value={editingEmployee.name} onChange={(e) => setEditingEmployee({...editingEmployee, name: e.target.value})} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit_email">Personal Email</Label>
+                  <Input id="edit_email" name="email" type="email" value={editingEmployee.email} onChange={(e) => setEditingEmployee({...editingEmployee, email: e.target.value})} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit_official_email">Official Email</Label>
+                  <Input id="edit_official_email" name="official_email" type="email" value={editingEmployee.official_email} onChange={(e) => setEditingEmployee({...editingEmployee, official_email: e.target.value})} required />
+                </div>
+                <div>
+                  <Label htmlFor="edit_designation">Designation</Label>
+                  <Input id="edit_designation" name="designation" value={editingEmployee.designation} onChange={(e) => setEditingEmployee({...editingEmployee, designation: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_date_of_joining">Date of Joining</Label>
+                  <Input id="edit_date_of_joining" name="date_of_joining" type="date" value={editingEmployee.date_of_joining} onChange={(e) => setEditingEmployee({...editingEmployee, date_of_joining: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_phone_no">Phone Number</Label>
+                  <Input id="edit_phone_no" name="phone_no" value={editingEmployee.phone_no} onChange={(e) => setEditingEmployee({...editingEmployee, phone_no: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_dob">Date of Birth</Label>
+                  <Input id="edit_dob" name="dob" type="date" value={editingEmployee.dob} onChange={(e) => setEditingEmployee({...editingEmployee, dob: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_emergency_contact_no">Emergency Contact</Label>
+                  <Input id="edit_emergency_contact_no" name="emergency_contact_no" value={editingEmployee.emergency_contact_no} onChange={(e) => setEditingEmployee({...editingEmployee, emergency_contact_no: e.target.value})} />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit_address">Address</Label>
+                <Textarea id="edit_address" name="address" value={editingEmployee.address} onChange={(e) => setEditingEmployee({...editingEmployee, address: e.target.value})} />
+              </div>
+              <DialogFooter>
+                <Button type="submit">Update Employee</Button>
+              </DialogFooter>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
