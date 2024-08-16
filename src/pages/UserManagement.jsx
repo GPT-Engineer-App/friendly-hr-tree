@@ -66,11 +66,7 @@ const UserManagement = () => {
       setIsAdmin(false);
     } catch (error) {
       console.error('Error creating user:', error);
-      if (error.message && error.message.toLowerCase().includes('already been registered')) {
-        toast.error('A user with this email already exists. Please use a different email address.');
-      } else {
-        toast.error('Error creating user: ' + error.message);
-      }
+      toast.error('Error creating user: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
