@@ -73,7 +73,7 @@ const EmployeeManagement = () => {
         .insert([{ 
           emp_id: employeeId, 
           folder_path: folderPath,
-          folder_type: 'employee' // Add this line
+          folder_type: 'employee'
         }]);
 
       if (storagePathError) {
@@ -188,7 +188,128 @@ const EmployeeManagement = () => {
   };
 
   return (
-    // ... (keep the existing JSX)
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Employee Management</h2>
+      
+      {/* Add Employee Form */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Add New Employee</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Add form fields here */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="emp_id">Employee ID</Label>
+                <Input
+                  id="emp_id"
+                  name="emp_id"
+                  value={newEmployee.emp_id}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={newEmployee.name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              {/* Add more fields as needed */}
+            </div>
+            <div>
+              <Label htmlFor="profile_picture">Profile Picture</Label>
+              <Input
+                id="profile_picture"
+                type="file"
+                onChange={handleProfilePictureChange}
+                accept="image/*"
+              />
+            </div>
+            <Button type="submit">Add Employee</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Employee List */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Employee List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <Input
+              type="text"
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead onClick={() => handleSort('name')}>
+                  Name {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead>Employee ID</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {employees.map((employee) => (
+                <TableRow key={employee.emp_id}>
+                  <TableCell>{employee.name}</TableCell>
+                  <TableCell>{employee.emp_id}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleUpdate(employee)} className="mr-2">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button onClick={() => handleDelete(employee.emp_id)} variant="destructive">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Employee Dialog */}
+      {editingEmployee && (
+        <Dialog open={!!editingEmployee} onOpenChange={() => setEditingEmployee(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Employee</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => { e.preventDefault(); handleSaveUpdate(); }} className="space-y-4">
+              {/* Add form fields for editing */}
+              <div>
+                <Label htmlFor="edit_name">Name</Label>
+                <Input
+                  id="edit_name"
+                  name="name"
+                  value={editingEmployee.name}
+                  onChange={(e) => setEditingEmployee({...editingEmployee, name: e.target.value})}
+                  required
+                />
+              </div>
+              {/* Add more fields as needed */}
+              <DialogFooter>
+                <Button type="submit">Save Changes</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
+    </div>
   );
 };
 
