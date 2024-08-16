@@ -56,16 +56,17 @@ const UserManagement = () => {
         email_confirm: true
       });
       if (error) {
+        console.error('Supabase error:', error);
         if (error.status === 422) {
-          if (error.message.includes('already exists')) {
+          if (error.message && error.message.toLowerCase().includes('already exists')) {
             toast.error('A user with this email already exists. Please use a different email address.');
-          } else if (error.message.includes('password')) {
+          } else if (error.message && error.message.toLowerCase().includes('password')) {
             toast.error('Invalid password: The password should be at least 6 characters long.');
           } else {
             toast.error('Invalid input: Please check the email and password.');
           }
-        } else if (error.message.includes('duplicate key')) {
-          toast.error('A user with this email already exists. Please use a different email address.');
+        } else if (error.status === 403) {
+          toast.error('You do not have permission to create users. Please contact your administrator.');
         } else {
           toast.error('An error occurred while creating the user. Please try again.');
         }
@@ -80,7 +81,10 @@ const UserManagement = () => {
         data.user.id,
         { app_metadata: { is_admin: isAdmin } }
       );
-      if (updateError) throw updateError;
+      if (updateError) {
+        console.error('Update error:', updateError);
+        throw updateError;
+      }
 
       toast.success('User created successfully');
       fetchUsers();
@@ -89,7 +93,11 @@ const UserManagement = () => {
       setIsAdmin(false);
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
+      if (error.message && error.message.toLowerCase().includes('duplicate key')) {
+        toast.error('A user with this email already exists. Please use a different email address.');
+      } else {
+        toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
+      }
     } finally {
       setIsSubmitting(false);
     }
