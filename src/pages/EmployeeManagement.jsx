@@ -8,8 +8,9 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUpDown, Edit, Trash2, Save, X } from 'lucide-react';
+import { Search, ArrowUpDown, Edit, Trash2, Save, X, Check } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
@@ -37,7 +38,7 @@ const EmployeeManagement = () => {
     try {
       const { data, error } = await supabase
         .from('employees')
-        .select('*')
+        .select('*, employee_documents(status)')
         .order(sortField, { ascending: sortDirection === 'asc' });
 
       if (error) throw error;
@@ -92,6 +93,22 @@ const EmployeeManagement = () => {
     } catch (error) {
       console.error('Error creating employee:', error);
       toast.error('Failed to create employee');
+    }
+  };
+
+  const handleStatusChange = async (empId, newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('employee_documents')
+        .update({ status: newStatus })
+        .eq('emp_id', empId);
+
+      if (error) throw error;
+      toast.success(`KYC status updated to ${newStatus}`);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Error updating KYC status:', error);
+      toast.error('Failed to update KYC status');
     }
   };
 
@@ -180,6 +197,7 @@ const EmployeeManagement = () => {
                 </TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Designation</TableHead>
+                <TableHead>KYC Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -194,6 +212,21 @@ const EmployeeManagement = () => {
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={employee.employee_documents[0]?.status || 'pending'}
+                      onValueChange={(value) => handleStatusChange(employee.emp_id, value)}
+                    >
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="approved">Approved</SelectItem>
+                        <SelectItem value="rejected">Rejected</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
                   <TableCell>
                     <Button className="mr-2">
                       <Edit className="h-4 w-4" />
