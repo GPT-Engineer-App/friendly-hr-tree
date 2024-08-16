@@ -28,6 +28,7 @@ const EmployeeManagement = () => {
   const [sortField, setSortField] = useState('name');
   const [sortDirection, setSortDirection] = useState('asc');
   const [editingEmployee, setEditingEmployee] = useState(null);
+  const [editProfilePicture, setEditProfilePicture] = useState(null);
 
   useEffect(() => {
     fetchEmployees();
@@ -123,6 +124,7 @@ const EmployeeManagement = () => {
 
   const handleUpdate = (employee) => {
     setEditingEmployee(employee);
+    setEditProfilePicture(null);
   };
 
   const handleSaveUpdate = async () => {
@@ -134,6 +136,30 @@ const EmployeeManagement = () => {
 
       if (error) throw error;
 
+      if (editProfilePicture) {
+        const fileExt = editProfilePicture.name.split('.').pop();
+        const folderName = editingEmployee.emp_id.replace(/\//g, '');
+        const fileName = `${folderName}/profile_picture.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('employees_info')
+          .upload(fileName, editProfilePicture, { upsert: true });
+
+        if (uploadError) throw uploadError;
+
+        const { data: urlData } = supabase.storage
+          .from('employees_info')
+          .getPublicUrl(fileName);
+
+        await supabase
+          .from('employee_documents')
+          .upsert({
+            emp_id: editingEmployee.emp_id,
+            document_type: 'profile_picture',
+            document_url: urlData.publicUrl
+          });
+      }
+
       setEmployees(prevEmployees => 
         prevEmployees.map(emp => 
           emp.emp_id === editingEmployee.emp_id ? editingEmployee : emp
@@ -142,6 +168,7 @@ const EmployeeManagement = () => {
 
       toast.success('Employee updated successfully');
       setEditingEmployee(null);
+      setEditProfilePicture(null);
     } catch (error) {
       toast.error('Error updating employee: ' + error.message);
     }
@@ -162,6 +189,10 @@ const EmployeeManagement = () => {
     } catch (error) {
       toast.error('Error deleting employee: ' + error.message);
     }
+  };
+
+  const handleEditProfilePictureChange = (e) => {
+    setEditProfilePicture(e.target.files[0]);
   };
 
   return (
@@ -272,12 +303,16 @@ const EmployeeManagement = () => {
 
       {editingEmployee && (
         <Dialog open={!!editingEmployee} onOpenChange={() => setEditingEmployee(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-3xl">
             <DialogHeader>
               <DialogTitle>Edit Employee</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveUpdate(); }} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="edit_emp_id">Employee ID</Label>
+                  <Input id="edit_emp_id" name="emp_id" value={editingEmployee.emp_id} onChange={(e) => setEditingEmployee({...editingEmployee, emp_id: e.target.value})} required />
+                </div>
                 <div>
                   <Label htmlFor="edit_name">Name</Label>
                   <Input id="edit_name" name="name" value={editingEmployee.name} onChange={(e) => setEditingEmployee({...editingEmployee, name: e.target.value})} required />
@@ -287,12 +322,32 @@ const EmployeeManagement = () => {
                   <Input id="edit_designation" name="designation" value={editingEmployee.designation} onChange={(e) => setEditingEmployee({...editingEmployee, designation: e.target.value})} />
                 </div>
                 <div>
-                  <Label htmlFor="edit_email">Email</Label>
-                  <Input id="edit_email" name="email" type="email" value={editingEmployee.email} onChange={(e) => setEditingEmployee({...editingEmployee, email: e.target.value})} required />
+                  <Label htmlFor="edit_date_of_joining">Date of Joining</Label>
+                  <Input id="edit_date_of_joining" name="date_of_joining" type="date" value={editingEmployee.date_of_joining} onChange={(e) => setEditingEmployee({...editingEmployee, date_of_joining: e.target.value})} />
                 </div>
                 <div>
                   <Label htmlFor="edit_phone">Phone Number</Label>
                   <Input id="edit_phone" name="phone_no" value={editingEmployee.phone_no} onChange={(e) => setEditingEmployee({...editingEmployee, phone_no: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_email">Email</Label>
+                  <Input id="edit_email" name="email" type="email" value={editingEmployee.email} onChange={(e) => setEditingEmployee({...editingEmployee, email: e.target.value})} required />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="edit_address">Address</Label>
+                  <Textarea id="edit_address" name="address" value={editingEmployee.address} onChange={(e) => setEditingEmployee({...editingEmployee, address: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_dob">Date of Birth</Label>
+                  <Input id="edit_dob" name="dob" type="date" value={editingEmployee.dob} onChange={(e) => setEditingEmployee({...editingEmployee, dob: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_emergency_contact_no">Emergency Contact</Label>
+                  <Input id="edit_emergency_contact_no" name="emergency_contact_no" value={editingEmployee.emergency_contact_no} onChange={(e) => setEditingEmployee({...editingEmployee, emergency_contact_no: e.target.value})} />
+                </div>
+                <div>
+                  <Label htmlFor="edit_profile_picture">Profile Picture</Label>
+                  <Input id="edit_profile_picture" type="file" onChange={handleEditProfilePictureChange} accept="image/*" />
                 </div>
               </div>
               <DialogFooter>
