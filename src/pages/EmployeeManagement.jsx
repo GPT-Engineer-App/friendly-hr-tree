@@ -67,7 +67,8 @@ const EmployeeManagement = () => {
 
       if (profilePicture) {
         const fileExt = profilePicture.name.split('.').pop();
-        const fileName = `${newEmployee.emp_id}/profile_picture.${fileExt}`;
+        const folderName = newEmployee.emp_id.replace(/\//g, '');
+        const fileName = `${folderName}/profile_picture.${fileExt}`;
 
         const { error: uploadError } = await supabase.storage
           .from('employees_info')
