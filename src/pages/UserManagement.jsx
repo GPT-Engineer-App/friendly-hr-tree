@@ -50,14 +50,11 @@ const UserManagement = () => {
 
     setIsSubmitting(true);
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.admin.createUser({
         email: newUserEmail,
         password: newUserPassword,
-        options: {
-          data: {
-            is_admin: isAdmin
-          }
-        }
+        email_confirm: true,
+        user_metadata: { is_admin: isAdmin }
       });
 
       if (error) throw error;
@@ -86,7 +83,10 @@ const UserManagement = () => {
 
   const handleUpdateUser = async () => {
     try {
-      const updates = {};
+      const updates = {
+        email: editingUser.email,
+        user_metadata: { is_admin: editingUser.user_metadata?.is_admin || false }
+      };
       if (editPassword) {
         updates.password = editPassword;
       }
@@ -186,7 +186,7 @@ const UserManagement = () => {
               {users.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>{user.email}</TableCell>
-                  <TableCell>{user.is_admin ? 'Admin' : 'User'}</TableCell>
+                  <TableCell>{user.user_metadata?.is_admin ? 'Admin' : 'User'}</TableCell>
                   <TableCell>
                     <Button onClick={() => handleEditUser(user)} className="mr-2">
                       <Edit className="h-4 w-4" />
@@ -211,7 +211,7 @@ const UserManagement = () => {
             <form onSubmit={(e) => { e.preventDefault(); handleUpdateUser(); }} className="space-y-4">
               <div>
                 <Label htmlFor="editEmail">Email</Label>
-                <Input id="editEmail" type="email" value={editingUser.email} disabled />
+                <Input id="editEmail" type="email" value={editingUser.email} onChange={(e) => setEditingUser({...editingUser, email: e.target.value})} />
               </div>
               <div>
                 <Label htmlFor="editPassword">New Password (leave blank to keep current)</Label>
@@ -230,6 +230,16 @@ const UserManagement = () => {
                     {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="editIsAdmin"
+                  checked={editingUser.user_metadata?.is_admin || false}
+                  onChange={(e) => setEditingUser({...editingUser, user_metadata: {...editingUser.user_metadata, is_admin: e.target.checked}})}
+                  className="mr-2"
+                />
+                <Label htmlFor="editIsAdmin">Is Admin</Label>
               </div>
               <Button type="submit">Update User</Button>
             </form>
