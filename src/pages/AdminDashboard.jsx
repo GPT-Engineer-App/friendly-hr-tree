@@ -1,10 +1,11 @@
 import React from 'react';
 import { Routes, Route, Link } from 'react-router-dom';
-import { Users, Home, Briefcase } from 'lucide-react';
+import { Users, Home, Briefcase, FileText } from 'lucide-react';
 import Header from '../components/Header';
 import AdminWelcome from './AdminWelcome';
 import UserManagement from './UserManagement';
 import EmployeeManagement from './EmployeeManagement';
+import KYCApproval from './KYCApproval';
 
 const AdminDashboard = () => {
   return (
@@ -24,6 +25,9 @@ const AdminDashboard = () => {
           <Link to="/admin/employee-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
             <Briefcase className="inline-block mr-2" size={20} /> Employee Management
           </Link>
+          <Link to="/admin/kyc-approval" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
+            <FileText className="inline-block mr-2" size={20} /> KYC Approval
+          </Link>
         </nav>
       </aside>
 
@@ -35,6 +39,7 @@ const AdminDashboard = () => {
             <Route path="/" element={<AdminWelcome />} />
             <Route path="/user-management" element={<UserManagement />} />
             <Route path="/employee-management" element={<EmployeeManagement />} />
+            <Route path="/kyc-approval" element={<KYCApproval />} />
           </Routes>
         </main>
       </div>

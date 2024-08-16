@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Calendar, FileText, TrendingUp, Bell, ChevronDown, ChevronUp, Mail, Phone, MapPin, Briefcase, Clock } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import KYCDocumentUpload from '../components/KYCDocumentUpload';
 
 const EmployeeInfo = ({ employeeData }) => {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
@@ -108,6 +109,8 @@ const EmployeeInfo = ({ employeeData }) => {
           </CardContent>
         </Card>
       </div>
+      
+      <KYCDocumentUpload employeeData={employeeData} />
     </div>
   );
 };
