@@ -155,10 +155,11 @@ const EmployeeManagement = () => {
 
   const handleUpdateEmployee = async () => {
     try {
+      const { emp_id, ...updateData } = editingEmployee;
       const { error } = await supabase
         .from('employees')
-        .update(editingEmployee)
-        .eq('id', editingEmployee.id);
+        .update(updateData)
+        .eq('emp_id', emp_id);
 
       if (error) throw error;
 
@@ -169,6 +170,11 @@ const EmployeeManagement = () => {
       console.error('Error updating employee:', error);
       toast.error('Error updating employee: ' + error.message);
     }
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingEmployee(prev => ({ ...prev, [name]: value }));
   };
 
   const handleDeleteEmployee = async (id) => {
@@ -284,7 +290,7 @@ const EmployeeManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
+                <TableRow key={employee.emp_id}>
                   <TableCell>{employee.emp_id}</TableCell>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
@@ -293,7 +299,7 @@ const EmployeeManagement = () => {
                     <Button onClick={() => handleEditEmployee(employee)} className="mr-2">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="destructive" onClick={() => handleDeleteEmployee(employee.id)}>
+                    <Button variant="destructive" onClick={() => handleDeleteEmployee(employee.emp_id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </TableCell>
@@ -314,44 +320,44 @@ const EmployeeManagement = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="edit_emp_id">Employee ID</Label>
-                  <Input id="edit_emp_id" name="emp_id" value={editingEmployee.emp_id} onChange={(e) => setEditingEmployee({...editingEmployee, emp_id: e.target.value})} required />
+                  <Input id="edit_emp_id" name="emp_id" value={editingEmployee.emp_id} onChange={handleEditInputChange} required disabled />
                 </div>
                 <div>
                   <Label htmlFor="edit_name">Name</Label>
-                  <Input id="edit_name" name="name" value={editingEmployee.name} onChange={(e) => setEditingEmployee({...editingEmployee, name: e.target.value})} required />
+                  <Input id="edit_name" name="name" value={editingEmployee.name} onChange={handleEditInputChange} required />
                 </div>
                 <div>
                   <Label htmlFor="edit_email">Personal Email</Label>
-                  <Input id="edit_email" name="email" type="email" value={editingEmployee.email} onChange={(e) => setEditingEmployee({...editingEmployee, email: e.target.value})} required />
+                  <Input id="edit_email" name="email" type="email" value={editingEmployee.email} onChange={handleEditInputChange} required />
                 </div>
                 <div>
                   <Label htmlFor="edit_official_email">Official Email</Label>
-                  <Input id="edit_official_email" name="official_email" type="email" value={editingEmployee.official_email} onChange={(e) => setEditingEmployee({...editingEmployee, official_email: e.target.value})} required />
+                  <Input id="edit_official_email" name="official_email" type="email" value={editingEmployee.official_email} onChange={handleEditInputChange} required />
                 </div>
                 <div>
                   <Label htmlFor="edit_designation">Designation</Label>
-                  <Input id="edit_designation" name="designation" value={editingEmployee.designation} onChange={(e) => setEditingEmployee({...editingEmployee, designation: e.target.value})} />
+                  <Input id="edit_designation" name="designation" value={editingEmployee.designation} onChange={handleEditInputChange} />
                 </div>
                 <div>
                   <Label htmlFor="edit_date_of_joining">Date of Joining</Label>
-                  <Input id="edit_date_of_joining" name="date_of_joining" type="date" value={editingEmployee.date_of_joining} onChange={(e) => setEditingEmployee({...editingEmployee, date_of_joining: e.target.value})} />
+                  <Input id="edit_date_of_joining" name="date_of_joining" type="date" value={editingEmployee.date_of_joining} onChange={handleEditInputChange} />
                 </div>
                 <div>
                   <Label htmlFor="edit_phone_no">Phone Number</Label>
-                  <Input id="edit_phone_no" name="phone_no" value={editingEmployee.phone_no} onChange={(e) => setEditingEmployee({...editingEmployee, phone_no: e.target.value})} />
+                  <Input id="edit_phone_no" name="phone_no" value={editingEmployee.phone_no} onChange={handleEditInputChange} />
                 </div>
                 <div>
                   <Label htmlFor="edit_dob">Date of Birth</Label>
-                  <Input id="edit_dob" name="dob" type="date" value={editingEmployee.dob} onChange={(e) => setEditingEmployee({...editingEmployee, dob: e.target.value})} />
+                  <Input id="edit_dob" name="dob" type="date" value={editingEmployee.dob} onChange={handleEditInputChange} />
                 </div>
                 <div>
                   <Label htmlFor="edit_emergency_contact_no">Emergency Contact</Label>
-                  <Input id="edit_emergency_contact_no" name="emergency_contact_no" value={editingEmployee.emergency_contact_no} onChange={(e) => setEditingEmployee({...editingEmployee, emergency_contact_no: e.target.value})} />
+                  <Input id="edit_emergency_contact_no" name="emergency_contact_no" value={editingEmployee.emergency_contact_no} onChange={handleEditInputChange} />
                 </div>
               </div>
               <div>
                 <Label htmlFor="edit_address">Address</Label>
-                <Textarea id="edit_address" name="address" value={editingEmployee.address} onChange={(e) => setEditingEmployee({...editingEmployee, address: e.target.value})} />
+                <Textarea id="edit_address" name="address" value={editingEmployee.address} onChange={handleEditInputChange} />
               </div>
               <DialogFooter>
                 <Button type="submit">Update Employee</Button>
