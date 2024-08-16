@@ -29,6 +29,7 @@ const EmployeeManagement = () => {
   const [sortDirection, setSortDirection] = useState('asc');
   const [editingEmployee, setEditingEmployee] = useState(null);
   const [editProfilePicture, setEditProfilePicture] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetchEmployees();
@@ -54,6 +55,7 @@ const EmployeeManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     try {
       if (!newEmployee.emp_id || !newEmployee.name || !newEmployee.email) {
         throw new Error("Employee ID, Name, and Email are required fields.");
@@ -111,7 +113,7 @@ const EmployeeManagement = () => {
       setProfilePicture(null);
     } catch (error) {
       console.error('Error adding employee:', error);
-      toast.error(error.message || 'An unexpected error occurred while adding the employee. Please try again.');
+      setErrorMessage(error.message || 'An unexpected error occurred while adding the employee. Please try again.');
     }
   };
 
@@ -212,6 +214,12 @@ const EmployeeManagement = () => {
           <CardTitle>Add New Employee</CardTitle>
         </CardHeader>
         <CardContent>
+          {errorMessage && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+              <strong className="font-bold">Error: </strong>
+              <span className="block sm:inline">{errorMessage}</span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
