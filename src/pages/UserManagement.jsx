@@ -44,7 +44,7 @@ const UserManagement = () => {
     try {
       const { data, error } = await supabase
         .from('employees')
-        .select('emp_id, name, email')
+        .select('id, emp_id, name, email')
         .is('user_id', null);
       if (error) throw error;
       setEmployees(data);
@@ -83,7 +83,7 @@ const UserManagement = () => {
       const { error: employeeError } = await supabase
         .from('employees')
         .update({ user_id: userData.user.id })
-        .eq('emp_id', selectedEmployee);
+        .eq('id', selectedEmployee);
 
       if (employeeError) throw employeeError;
 
@@ -203,7 +203,7 @@ const UserManagement = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((employee) => (
-                    <SelectItem key={employee.emp_id} value={employee.emp_id}>
+                    <SelectItem key={employee.id} value={employee.id}>
                       {employee.name} ({employee.email})
                     </SelectItem>
                   ))}

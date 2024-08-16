@@ -23,7 +23,8 @@ const fromSupabase = async (query) => {
 
 | name                 | type                     | format    | required |
 |----------------------|--------------------------|-----------|----------|
-| user_id              | uuid                     | string    | true     |
+| id                   | uuid                     | string    | true     |
+| user_id              | uuid                     | string    | false    |
 | emp_id               | character varying(20)    | string    | true     |
 | name                 | character varying(100)   | string    | true     |
 | designation          | character varying(100)   | string    | true     |
