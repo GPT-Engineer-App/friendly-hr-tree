@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, ArrowUpDown, Edit, Trash2, Save, X } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
@@ -198,7 +198,6 @@ const EmployeeManagement = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Add form fields here */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="emp_id">Employee ID</Label>
@@ -220,7 +219,73 @@ const EmployeeManagement = () => {
                   required
                 />
               </div>
-              {/* Add more fields as needed */}
+              <div>
+                <Label htmlFor="designation">Designation</Label>
+                <Input
+                  id="designation"
+                  name="designation"
+                  value={newEmployee.designation}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="date_of_joining">Date of Joining</Label>
+                <Input
+                  id="date_of_joining"
+                  name="date_of_joining"
+                  type="date"
+                  value={newEmployee.date_of_joining}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phone_no">Phone Number</Label>
+                <Input
+                  id="phone_no"
+                  name="phone_no"
+                  value={newEmployee.phone_no}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={newEmployee.email}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Textarea
+                  id="address"
+                  name="address"
+                  value={newEmployee.address}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="dob">Date of Birth</Label>
+                <Input
+                  id="dob"
+                  name="dob"
+                  type="date"
+                  value={newEmployee.dob}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div>
+                <Label htmlFor="emergency_contact_no">Emergency Contact Number</Label>
+                <Input
+                  id="emergency_contact_no"
+                  name="emergency_contact_no"
+                  value={newEmployee.emergency_contact_no}
+                  onChange={handleInputChange}
+                />
+              </div>
             </div>
             <div>
               <Label htmlFor="profile_picture">Profile Picture</Label>
@@ -290,7 +355,6 @@ const EmployeeManagement = () => {
               <DialogTitle>Edit Employee</DialogTitle>
             </DialogHeader>
             <form onSubmit={(e) => { e.preventDefault(); handleSaveUpdate(); }} className="space-y-4">
-              {/* Add form fields for editing */}
               <div>
                 <Label htmlFor="edit_name">Name</Label>
                 <Input
@@ -301,7 +365,35 @@ const EmployeeManagement = () => {
                   required
                 />
               </div>
-              {/* Add more fields as needed */}
+              <div>
+                <Label htmlFor="edit_designation">Designation</Label>
+                <Input
+                  id="edit_designation"
+                  name="designation"
+                  value={editingEmployee.designation}
+                  onChange={(e) => setEditingEmployee({...editingEmployee, designation: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_email">Email</Label>
+                <Input
+                  id="edit_email"
+                  name="email"
+                  type="email"
+                  value={editingEmployee.email}
+                  onChange={(e) => setEditingEmployee({...editingEmployee, email: e.target.value})}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit_phone">Phone Number</Label>
+                <Input
+                  id="edit_phone"
+                  name="phone_no"
+                  value={editingEmployee.phone_no}
+                  onChange={(e) => setEditingEmployee({...editingEmployee, phone_no: e.target.value})}
+                />
+              </div>
               <DialogFooter>
                 <Button type="submit">Save Changes</Button>
               </DialogFooter>
