@@ -35,13 +35,18 @@ const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*')
-        .order(sortField, { ascending: sortDirection === 'asc' });
+      let query = supabase.from('employees').select('*');
+      
+      if (sortField) {
+        query = query.order(sortField, { ascending: sortDirection === 'asc' });
+      }
+      
+      const { data, error } = await query;
+      
       if (error) throw error;
       setEmployees(data);
     } catch (error) {
+      console.error('Error fetching employees:', error);
       toast.error('Error fetching employees: ' + error.message);
     }
   };
