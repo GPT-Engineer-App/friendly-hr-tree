@@ -16,8 +16,9 @@ const UserManagement = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
-const [editPassword, setEditPassword] = useState('');
-const [showEditPassword, setShowEditPassword] = useState(false);
+  const [editPassword, setEditPassword] = useState('');
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -36,6 +37,19 @@ const [showEditPassword, setShowEditPassword] = useState(false);
 
   const createUser = async (e) => {
     e.preventDefault();
+    
+    // Basic client-side validation
+    if (!newUserEmail || !newUserPassword) {
+      toast.error('Please provide both email and password');
+      return;
+    }
+    
+    if (newUserPassword.length < 6) {
+      toast.error('Password must be at least 6 characters long');
+      return;
+    }
+
+    setIsSubmitting(true);
     try {
       const { data, error } = await supabase.auth.admin.createUser({
         email: newUserEmail,
@@ -73,6 +87,8 @@ const [showEditPassword, setShowEditPassword] = useState(false);
     } catch (error) {
       console.error('Error creating user:', error);
       toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -87,6 +103,7 @@ const [showEditPassword, setShowEditPassword] = useState(false);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     try {
       const updates = {};
       if (editingUser.email !== editingUser.originalEmail) {
@@ -113,6 +130,8 @@ const [showEditPassword, setShowEditPassword] = useState(false);
     } catch (error) {
       console.error('Error updating user:', error);
       toast.error('Error updating user: ' + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -177,7 +196,9 @@ const [showEditPassword, setShowEditPassword] = useState(false);
               />
               <Label htmlFor="isAdmin">Is Admin</Label>
             </div>
-            <Button type="submit">Add User</Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Adding...' : 'Add User'}
+            </Button>
           </form>
         </CardContent>
       </Card>
@@ -261,7 +282,9 @@ const [showEditPassword, setShowEditPassword] = useState(false);
                 />
                 <Label htmlFor="editIsAdmin">Is Admin</Label>
               </div>
-              <Button type="submit">Update User</Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Updating...' : 'Update User'}
+              </Button>
             </form>
           </DialogContent>
         </Dialog>
