@@ -45,7 +45,7 @@ const UserManagement = () => {
       const { data, error } = await supabase
         .from('employees')
         .select('emp_id, name, email')
-        .is('auth_user_id', null);
+        .is('user_id', null);
       if (error) throw error;
       setEmployees(data);
     } catch (error) {
@@ -82,7 +82,7 @@ const UserManagement = () => {
 
       const { error: employeeError } = await supabase
         .from('employees')
-        .update({ auth_user_id: userData.user.id })
+        .update({ user_id: userData.user.id })
         .eq('emp_id', selectedEmployee);
 
       if (employeeError) throw employeeError;
@@ -136,7 +136,13 @@ const UserManagement = () => {
         .update({ user_id: null })
         .eq('user_id', userId);
 
-      if (employeeError) throw employeeError;
+      if (employeeError) {
+        console.error('Error updating employee:', employeeError);
+        // If the error is due to no matching rows, we can ignore it
+        if (employeeError.code !== 'PGRST116') {
+          throw employeeError;
+        }
+      }
 
       const { error: userError } = await supabase.auth.admin.deleteUser(userId);
       if (userError) throw userError;
