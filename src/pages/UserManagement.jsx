@@ -57,7 +57,8 @@ const UserManagement = () => {
         email: newUserEmail,
         password: newUserPassword,
         email_confirm: true,
-        user_metadata: { is_admin: isAdmin }
+        user_metadata: { is_admin: isAdmin },
+        app_metadata: { is_admin: isAdmin }
       });
 
       if (error) throw error;
@@ -82,9 +83,11 @@ const UserManagement = () => {
 
   const handleUpdateUser = async () => {
     try {
+      const isAdminStatus = editingUser.user_metadata?.is_admin || false;
       const updates = {
         email: editingUser.email,
-        user_metadata: { is_admin: editingUser.user_metadata?.is_admin || false }
+        user_metadata: { is_admin: isAdminStatus },
+        app_metadata: { is_admin: isAdminStatus }
       };
       if (editPassword) {
         updates.password = editPassword;
