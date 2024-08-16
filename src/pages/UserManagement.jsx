@@ -93,7 +93,14 @@ const UserManagement = () => {
         password: newUserPassword,
         email_confirm: true
       });
-      if (error) throw error;
+      if (error) {
+        if (error.status === 422) {
+          toast.error('Invalid input: Please check the email and password. The password should be at least 6 characters long.');
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       const { error: updateError } = await supabase.auth.admin.updateUserById(
         data.user.id,
@@ -107,7 +114,8 @@ const UserManagement = () => {
       setNewUserPassword('');
       setIsAdmin(false);
     } catch (error) {
-      toast.error('Error creating user: ' + error.message);
+      console.error('Error creating user:', error);
+      toast.error('Error creating user: ' + (error.message || 'Unknown error occurred'));
     }
   };
 
