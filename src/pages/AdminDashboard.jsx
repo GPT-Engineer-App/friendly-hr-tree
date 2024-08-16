@@ -15,13 +15,13 @@ const AdminDashboard = () => {
           <h2 className="text-2xl font-semibold">Admin Dashboard</h2>
         </div>
         <nav className="mt-6">
-          <Link to="/admin-dashboard" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
+          <Link to="/admin" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
             <Home className="inline-block mr-2" size={20} /> Home
           </Link>
-          <Link to="/admin-dashboard/user-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
+          <Link to="/admin/user-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
             <Users className="inline-block mr-2" size={20} /> User Management
           </Link>
-          <Link to="/admin-dashboard/employee-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
+          <Link to="/admin/employee-management" className="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 hover:text-white">
             <Briefcase className="inline-block mr-2" size={20} /> Employee Management
           </Link>
         </nav>

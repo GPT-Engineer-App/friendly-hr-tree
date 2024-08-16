@@ -54,22 +54,40 @@ const App = () => {
         <Router>
           <Routes>
             <Route path="/login" element={!user ? <LoginPage /> : <Navigate to="/" />} />
+            
+            {/* Admin Routes */}
             <Route
-              path="/admin-dashboard/*"
-              element={user?.app_metadata?.is_admin ? <AdminDashboard /> : <Navigate to="/login" />}
+              path="/admin/*"
+              element={
+                user?.app_metadata?.is_admin ? (
+                  <AdminDashboard />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
             />
+            
+            {/* Non-Admin (User) Routes */}
             <Route
-              path="/user-dashboard"
-              element={user && !user.app_metadata?.is_admin && employeeData ? <UserDashboard employeeData={employeeData} /> : <Navigate to="/login" />}
+              path="/user/*"
+              element={
+                user && !user.app_metadata?.is_admin ? (
+                  <UserDashboard employeeData={employeeData} />
+                ) : (
+                  <Navigate to="/login" />
+                )
+              }
             />
+            
+            {/* Root path redirect */}
             <Route
               path="/"
               element={
                 user ? (
                   user.app_metadata?.is_admin ? (
-                    <Navigate to="/admin-dashboard" />
+                    <Navigate to="/admin" />
                   ) : (
-                    employeeData ? <Navigate to="/user-dashboard" /> : <Navigate to="/login" />
+                    <Navigate to="/user" />
                   )
                 ) : (
                   <Navigate to="/login" />
