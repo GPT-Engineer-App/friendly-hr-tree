@@ -119,8 +119,153 @@ const EmployeeManagement = () => {
     }
   };
 
-  // ... rest of the component code ...
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEmployee(prev => ({ ...prev, [name]: value }));
+  };
 
+  const handleProfilePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfilePicture(file);
+    }
+  };
+
+  const handleSort = (field) => {
+    setSortField(field);
+    setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc');
+    fetchEmployees();
+  };
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredEmployees = employees.filter(employee =>
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  return (
+    <div className="p-4">
+      <h2 className="text-2xl font-bold mb-4">Employee Management</h2>
+      
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Add New Employee</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {errorMessage && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                <strong className="font-bold">Error: </strong>
+                <span className="block sm:inline">{errorMessage}</span>
+              </div>
+            )}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="emp_id">Employee ID</Label>
+                <Input id="emp_id" name="emp_id" value={newEmployee.emp_id} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" value={newEmployee.name} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="email">Personal Email</Label>
+                <Input id="email" name="email" type="email" value={newEmployee.email} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="official_email">Official Email</Label>
+                <Input id="official_email" name="official_email" type="email" value={newEmployee.official_email} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="designation">Designation</Label>
+                <Input id="designation" name="designation" value={newEmployee.designation} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="date_of_joining">Date of Joining</Label>
+                <Input id="date_of_joining" name="date_of_joining" type="date" value={newEmployee.date_of_joining} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="phone_no">Phone Number</Label>
+                <Input id="phone_no" name="phone_no" value={newEmployee.phone_no} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="dob">Date of Birth</Label>
+                <Input id="dob" name="dob" type="date" value={newEmployee.dob} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
+                <Input id="emergency_contact_no" name="emergency_contact_no" value={newEmployee.emergency_contact_no} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="profile_picture">Profile Picture</Label>
+                <Input id="profile_picture" type="file" onChange={handleProfilePictureChange} accept="image/*" />
+              </div>
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Textarea id="address" name="address" value={newEmployee.address} onChange={handleInputChange} />
+            </div>
+            <Button type="submit">Add Employee</Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Employee List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mb-4">
+            <Input
+              placeholder="Search employees..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="max-w-sm"
+            />
+          </div>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('emp_id')}>
+                  Employee ID {sortField === 'emp_id' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead className="cursor-pointer" onClick={() => handleSort('name')}>
+                  Name {sortField === 'name' && (sortDirection === 'asc' ? '↑' : '↓')}
+                </TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Designation</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredEmployees.map((employee) => (
+                <TableRow key={employee.id}>
+                  <TableCell>{employee.emp_id}</TableCell>
+                  <TableCell>{employee.name}</TableCell>
+                  <TableCell>{employee.email}</TableCell>
+                  <TableCell>{employee.designation}</TableCell>
+                  <TableCell>
+                    <Button onClick={() => setEditingEmployee(employee)} className="mr-2">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="destructive" onClick={() => handleDeleteEmployee(employee.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Add edit employee dialog here if needed */}
+    </div>
+  );
 };
 
 export default EmployeeManagement;
