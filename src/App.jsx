@@ -15,7 +15,7 @@ const App = () => {
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
-      if (user) {
+      if (user && !user.app_metadata?.is_admin) {
         try {
           const { data, error } = await supabase
             .from('employees')
@@ -33,12 +33,9 @@ const App = () => {
         } catch (error) {
           console.error('Error fetching employee data:', error);
           setEmployeeData(null);
-        } finally {
-          setLoadingEmployee(false);
         }
-      } else {
-        setLoadingEmployee(false);
       }
+      setLoadingEmployee(false);
     };
 
     fetchEmployeeData();
