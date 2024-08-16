@@ -32,7 +32,7 @@ const EmployeeDocuments = () => {
     try {
       const { data, error } = await supabase
         .from('employee_documents')
-        .select('*')
+        .select('emp_id, document_type, document_url, status')
         .eq('emp_id', empId);
 
       if (error) throw error;
@@ -43,12 +43,13 @@ const EmployeeDocuments = () => {
     }
   };
 
-  const handleApprove = async (documentId) => {
+  const handleApprove = async (documentType) => {
     try {
       const { error } = await supabase
         .from('employee_documents')
         .update({ status: 'approved' })
-        .eq('id', documentId);
+        .eq('emp_id', empId)
+        .eq('document_type', documentType);
 
       if (error) throw error;
       toast.success('Document approved successfully');
@@ -59,12 +60,13 @@ const EmployeeDocuments = () => {
     }
   };
 
-  const handleReject = async (documentId) => {
+  const handleReject = async (documentType) => {
     try {
       const { error } = await supabase
         .from('employee_documents')
         .update({ status: 'rejected' })
-        .eq('id', documentId);
+        .eq('emp_id', empId)
+        .eq('document_type', documentType);
 
       if (error) throw error;
       toast.success('Document rejected');
@@ -89,8 +91,8 @@ const EmployeeDocuments = () => {
         </TableHeader>
         <TableBody>
           {documents.map((doc) => (
-            <TableRow key={doc.id}>
-              <TableCell>{documentTypes[doc.document_type]}</TableCell>
+            <TableRow key={doc.document_type}>
+              <TableCell>{documentTypes[doc.document_type] || doc.document_type}</TableCell>
               <TableCell>{doc.status}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
@@ -118,10 +120,10 @@ const EmployeeDocuments = () => {
                   </Dialog>
                   {doc.status === 'pending' && (
                     <>
-                      <Button onClick={() => handleApprove(doc.id)} className="bg-green-500 hover:bg-green-600">
+                      <Button onClick={() => handleApprove(doc.document_type)} className="bg-green-500 hover:bg-green-600">
                         <Check className="h-4 w-4 mr-2" /> Approve
                       </Button>
-                      <Button onClick={() => handleReject(doc.id)} variant="destructive">
+                      <Button onClick={() => handleReject(doc.document_type)} variant="destructive">
                         <X className="h-4 w-4 mr-2" /> Reject
                       </Button>
                     </>
