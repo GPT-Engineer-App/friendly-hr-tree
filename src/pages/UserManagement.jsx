@@ -35,20 +35,23 @@ const UserManagement = () => {
     }
   };
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const createUser = async (e) => {
     e.preventDefault();
     
     if (!newUserEmail || !newUserPassword) {
-      toast.error('Please provide both email and password');
+      setErrorMessage('Please provide both email and password');
       return;
     }
     
     if (newUserPassword.length < 6) {
-      toast.error('Password must be at least 6 characters long');
+      setErrorMessage('Password must be at least 6 characters long');
       return;
     }
 
     setIsSubmitting(true);
+    setErrorMessage('');
     try {
       const { data, error } = await supabase.auth.admin.createUser({
         email: newUserEmail,
@@ -66,7 +69,7 @@ const UserManagement = () => {
       setIsAdmin(false);
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error('Error creating user: ' + error.message);
+      setErrorMessage(error.message || 'An error occurred while creating the user');
     } finally {
       setIsSubmitting(false);
     }
@@ -119,6 +122,12 @@ const UserManagement = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={createUser} className="space-y-4">
+  {errorMessage && (
+    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+      <strong className="font-bold">Error: </strong>
+      <span className="block sm:inline">{errorMessage}</span>
+    </div>
+  )}
             <div>
               <Label htmlFor="email">Email</Label>
               <Input
