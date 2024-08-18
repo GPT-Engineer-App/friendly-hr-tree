@@ -179,6 +179,7 @@ const EmployeeManagement = () => {
                 </TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Designation</TableHead>
+                <TableHead>KYC Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -193,6 +194,15 @@ const EmployeeManagement = () => {
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
+                  <TableCell>
+                    <span className={`font-bold ${
+                      employee.kyc_status === 'Approved' ? 'text-green-600' :
+                      employee.kyc_status === 'Rejected' ? 'text-red-600' :
+                      'text-yellow-600'
+                    }`}>
+                      {employee.kyc_status || 'Pending'}
+                    </span>
+                  </TableCell>
                   <TableCell>
                     <Button className="mr-2">
                       <Edit className="h-4 w-4" />
