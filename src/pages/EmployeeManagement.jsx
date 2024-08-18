@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,18 +15,7 @@ const EmployeeManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('emp_id');
   const [sortDirection, setSortDirection] = useState('asc');
-  const [newEmployee, setNewEmployee] = useState({
-    emp_id: '',
-    name: '',
-    email: '',
-    official_email: '',
-    designation: '',
-    date_of_joining: '',
-    phone_no: '',
-    address: '',
-    dob: '',
-    emergency_contact_no: '',
-  });
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
@@ -60,38 +49,8 @@ const EmployeeManagement = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewEmployee(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleCreateEmployee = async (e) => {
-    e.preventDefault();
-    try {
-      const { data, error } = await supabase
-        .from('employees')
-        .insert([newEmployee]);
-
-      if (error) throw error;
-
-      toast.success('Employee created successfully');
-      setNewEmployee({
-        emp_id: '',
-        name: '',
-        email: '',
-        official_email: '',
-        designation: '',
-        date_of_joining: '',
-        phone_no: '',
-        address: '',
-        dob: '',
-        emergency_contact_no: '',
-      });
-      fetchEmployees();
-    } catch (error) {
-      console.error('Error creating employee:', error);
-      toast.error('Failed to create employee');
-    }
+  const handleEdit = (empId) => {
+    navigate(`/admin/employee-details/${empId}`, { state: { isEditing: true } });
   };
 
   const filteredEmployees = employees.filter(emp =>
@@ -102,59 +61,6 @@ const EmployeeManagement = () => {
 
   return (
     <div className="p-4">
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle>Create New Employee</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleCreateEmployee} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="emp_id">Employee ID</Label>
-                <Input id="emp_id" name="emp_id" value={newEmployee.emp_id} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" value={newEmployee.name} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="email">Personal Email</Label>
-                <Input id="email" name="email" type="email" value={newEmployee.email} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="official_email">Official Email</Label>
-                <Input id="official_email" name="official_email" type="email" value={newEmployee.official_email} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="designation">Designation</Label>
-                <Input id="designation" name="designation" value={newEmployee.designation} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="date_of_joining">Date of Joining</Label>
-                <Input id="date_of_joining" name="date_of_joining" type="date" value={newEmployee.date_of_joining} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="phone_no">Phone Number</Label>
-                <Input id="phone_no" name="phone_no" value={newEmployee.phone_no} onChange={handleInputChange} required />
-              </div>
-              <div>
-                <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
-                <Input id="emergency_contact_no" name="emergency_contact_no" value={newEmployee.emergency_contact_no} onChange={handleInputChange} />
-              </div>
-              <div>
-                <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" name="dob" type="date" value={newEmployee.dob} onChange={handleInputChange} />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Textarea id="address" name="address" value={newEmployee.address} onChange={handleInputChange} />
-            </div>
-            <Button type="submit">Create Employee</Button>
-          </form>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>Employee List</CardTitle>
@@ -204,7 +110,7 @@ const EmployeeManagement = () => {
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Button className="mr-2">
+                    <Button className="mr-2" onClick={() => handleEdit(employee.emp_id)}>
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button variant="destructive">
