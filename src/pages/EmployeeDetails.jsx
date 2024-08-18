@@ -150,7 +150,7 @@ const EmployeeDetails = () => {
         <CardContent>
           {isEditing ? (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="emp_id">Employee ID</Label>
                   <Input id="emp_id" name="emp_id" value={editedEmployee.emp_id} onChange={handleInputChange} required />
@@ -192,22 +192,26 @@ const EmployeeDetails = () => {
                 <Label htmlFor="address">Address</Label>
                 <Textarea id="address" name="address" value={editedEmployee.address} onChange={handleInputChange} />
               </div>
-              <Button type="submit">Save Changes</Button>
-              <Button type="button" variant="outline" className="ml-2" onClick={() => setIsEditing(false)}>Cancel</Button>
+              <div className="flex justify-end space-x-2">
+                <Button type="submit">Save Changes</Button>
+                <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+              </div>
             </form>
           ) : (
             <>
-              <p><strong>Employee ID:</strong> {employee.emp_id}</p>
-              <p><strong>Name:</strong> {employee.name}</p>
-              <p><strong>Personal Email:</strong> {employee.email}</p>
-              <p><strong>Official Email:</strong> {employee.official_email}</p>
-              <p><strong>Designation:</strong> {employee.designation}</p>
-              <p><strong>Date of Joining:</strong> {employee.date_of_joining}</p>
-              <p><strong>Phone Number:</strong> {employee.phone_no}</p>
-              <p><strong>Emergency Contact:</strong> {employee.emergency_contact_no}</p>
-              <p><strong>Date of Birth:</strong> {employee.dob}</p>
-              <p><strong>Address:</strong> {employee.address}</p>
-              <p><strong>KYC Status:</strong> 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <p><strong>Employee ID:</strong> {employee.emp_id}</p>
+                <p><strong>Name:</strong> {employee.name}</p>
+                <p><strong>Personal Email:</strong> {employee.email}</p>
+                <p><strong>Official Email:</strong> {employee.official_email}</p>
+                <p><strong>Designation:</strong> {employee.designation}</p>
+                <p><strong>Date of Joining:</strong> {employee.date_of_joining}</p>
+                <p><strong>Phone Number:</strong> {employee.phone_no}</p>
+                <p><strong>Emergency Contact:</strong> {employee.emergency_contact_no}</p>
+                <p><strong>Date of Birth:</strong> {employee.dob}</p>
+              </div>
+              <p className="mt-4"><strong>Address:</strong> {employee.address}</p>
+              <p className="mt-4"><strong>KYC Status:</strong> 
                 <span className={`font-bold ${
                   employee.kyc_status === 'Approved' ? 'text-green-600' :
                   employee.kyc_status === 'Rejected' ? 'text-red-600' :
@@ -227,53 +231,55 @@ const EmployeeDetails = () => {
           <CardTitle>Document Verification</CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Document Type</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {documents.map((doc) => (
-                <TableRow key={doc.id}>
-                  <TableCell>{doc.document_type}</TableCell>
-                  <TableCell>
-                    <span className={`font-bold ${
-                      doc.status === 'Verified' ? 'text-green-600' :
-                      doc.status === 'Rejected' ? 'text-red-600' :
-                      'text-yellow-600'
-                    }`}>
-                      {doc.status}
-                    </span>
-                    {doc.status === 'Rejected' && doc.reject_reason && (
-                      <p className="text-sm text-red-600">Reason: {doc.reject_reason}</p>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <a href={doc.document_url} target="_blank" rel="noopener noreferrer">
-                        <Button variant="outline">
-                          <ExternalLink className="h-4 w-4 mr-2" /> View
-                        </Button>
-                      </a>
-                      {doc.status !== 'Verified' && (
-                        <Button onClick={() => updateDocumentStatus(doc.id, 'Verified')} className="bg-green-500 hover:bg-green-600">
-                          <Check className="h-4 w-4 mr-2" /> Verify
-                        </Button>
-                      )}
-                      {doc.status !== 'Rejected' && (
-                        <Button onClick={() => handleReject(doc.id)} variant="destructive">
-                          <X className="h-4 w-4 mr-2" /> Reject
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Document Type</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {documents.map((doc) => (
+                  <TableRow key={doc.id}>
+                    <TableCell>{doc.document_type}</TableCell>
+                    <TableCell>
+                      <span className={`font-bold ${
+                        doc.status === 'Verified' ? 'text-green-600' :
+                        doc.status === 'Rejected' ? 'text-red-600' :
+                        'text-yellow-600'
+                      }`}>
+                        {doc.status}
+                      </span>
+                      {doc.status === 'Rejected' && doc.reject_reason && (
+                        <p className="text-sm text-red-600">Reason: {doc.reject_reason}</p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-2">
+                        <a href={doc.document_url} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" className="w-full sm:w-auto">
+                            <ExternalLink className="h-4 w-4 mr-2" /> View
+                          </Button>
+                        </a>
+                        {doc.status !== 'Verified' && (
+                          <Button onClick={() => updateDocumentStatus(doc.id, 'Verified')} className="bg-green-500 hover:bg-green-600 w-full sm:w-auto">
+                            <Check className="h-4 w-4 mr-2" /> Verify
+                          </Button>
+                        )}
+                        {doc.status !== 'Rejected' && (
+                          <Button onClick={() => handleReject(doc.id)} variant="destructive" className="w-full sm:w-auto">
+                            <X className="h-4 w-4 mr-2" /> Reject
+                          </Button>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
@@ -282,16 +288,17 @@ const EmployeeDetails = () => {
           <CardTitle>Update KYC Status</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <Button
               onClick={() => updateKycStatus('Approved')}
-              className="bg-green-500 hover:bg-green-600"
+              className="bg-green-500 hover:bg-green-600 w-full sm:w-auto"
             >
               Approve KYC
             </Button>
             <Button
               onClick={() => updateKycStatus('Rejected')}
               variant="destructive"
+              className="w-full sm:w-auto"
             >
               Reject KYC
             </Button>
