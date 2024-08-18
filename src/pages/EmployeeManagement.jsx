@@ -8,13 +8,27 @@ import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, ArrowUpDown, Edit, Trash2 } from 'lucide-react';
+import { Search, ArrowUpDown, Edit, Trash2, Plus } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('emp_id');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newEmployee, setNewEmployee] = useState({
+    emp_id: '',
+    name: '',
+    email: '',
+    official_email: '',
+    designation: '',
+    date_of_joining: '',
+    phone_no: '',
+    emergency_contact_no: '',
+    dob: '',
+    address: ''
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -53,6 +67,29 @@ const EmployeeManagement = () => {
     navigate(`/admin/employee-details/${empId}`, { state: { isEditing: true } });
   };
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewEmployee(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleCreateEmployee = async (e) => {
+    e.preventDefault();
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .insert([newEmployee]);
+
+      if (error) throw error;
+
+      toast.success('Employee created successfully');
+      setShowCreateDialog(false);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Error creating employee:', error);
+      toast.error('Failed to create employee');
+    }
+  };
+
   const filteredEmployees = employees.filter(emp =>
     emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -62,8 +99,11 @@ const EmployeeManagement = () => {
   return (
     <div className="p-4">
       <Card>
-        <CardHeader>
+        <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Employee List</CardTitle>
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus className="h-4 w-4 mr-2" /> Create New Employee
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
@@ -123,6 +163,57 @@ const EmployeeManagement = () => {
           </Table>
         </CardContent>
       </Card>
+
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create New Employee</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleCreateEmployee} className="space-y-4">
+            <div>
+              <Label htmlFor="emp_id">Employee ID</Label>
+              <Input id="emp_id" name="emp_id" value={newEmployee.emp_id} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input id="name" name="name" value={newEmployee.name} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="email">Personal Email</Label>
+              <Input id="email" name="email" type="email" value={newEmployee.email} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="official_email">Official Email</Label>
+              <Input id="official_email" name="official_email" type="email" value={newEmployee.official_email} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="designation">Designation</Label>
+              <Input id="designation" name="designation" value={newEmployee.designation} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="date_of_joining">Date of Joining</Label>
+              <Input id="date_of_joining" name="date_of_joining" type="date" value={newEmployee.date_of_joining} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="phone_no">Phone Number</Label>
+              <Input id="phone_no" name="phone_no" value={newEmployee.phone_no} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
+              <Input id="emergency_contact_no" name="emergency_contact_no" value={newEmployee.emergency_contact_no} onChange={handleInputChange} />
+            </div>
+            <div>
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input id="dob" name="dob" type="date" value={newEmployee.dob} onChange={handleInputChange} />
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Textarea id="address" name="address" value={newEmployee.address} onChange={handleInputChange} />
+            </div>
+            <Button type="submit">Create Employee</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
