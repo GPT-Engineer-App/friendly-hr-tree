@@ -8,6 +8,7 @@ import EmployeeManagement from './EmployeeManagement';
 import KYCApproval from './KYCApproval';
 import EmployeeKYCApproval from './EmployeeKYCApproval';
 import EmployeeDocuments from './EmployeeDocuments';
+import EmployeeDetails from './EmployeeDetails';
 
 const AdminDashboard = () => {
   return (
@@ -43,7 +44,8 @@ const AdminDashboard = () => {
             <Route path="/employee-management" element={<EmployeeManagement />} />
             <Route path="/kyc-approval" element={<KYCApproval />} />
             <Route path="/kyc-approval/:empId" element={<EmployeeKYCApproval />} />
-<Route path="/employee-documents/:empId" element={<EmployeeDocuments />} />
+            <Route path="/employee-documents/:empId" element={<EmployeeDocuments />} />
+            <Route path="/employee-details/:empId" element={<EmployeeDetails />} />
           </Routes>
         </main>
       </div>
