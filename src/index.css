@@ -74,3 +74,55 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile-first responsive styles */
+@layer utilities {
+  .responsive-container {
+    @apply w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16;
+  }
+
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4;
+  }
+
+  .responsive-text {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+
+  .responsive-heading {
+    @apply text-xl sm:text-2xl md:text-3xl font-bold;
+  }
+
+  .responsive-button {
+    @apply px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base;
+  }
+
+  .responsive-input {
+    @apply w-full px-3 py-2 text-sm sm:text-base;
+  }
+
+  .responsive-table {
+    @apply w-full overflow-x-auto;
+  }
+
+  .responsive-card {
+    @apply p-4 sm:p-6;
+  }
+}
+
+/* Optimize touch interactions */
+@media (hover: none) and (pointer: coarse) {
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+/* Responsive image handling */
+.responsive-image {
+  @apply w-full h-auto object-cover;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
