@@ -141,15 +141,15 @@ const EmployeeDetails = () => {
   };
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
   }
 
   if (!employee) {
-    return <div>No employee found</div>;
+    return <div className="flex justify-center items-center h-screen">No employee found</div>;
   }
 
   return (
