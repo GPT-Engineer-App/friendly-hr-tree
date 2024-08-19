@@ -100,7 +100,7 @@ const EmployeeManagement = () => {
         fetchEmployees();
       } catch (error) {
         console.error('Error deleting employee:', error);
-        toast.error('Failed to delete employee');
+        toast.error('Failed to delete employee: ' + error.message);
       }
     }
   };
