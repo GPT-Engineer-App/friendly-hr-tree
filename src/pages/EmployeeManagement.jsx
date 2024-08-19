@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +27,6 @@ const EmployeeManagement = () => {
     official_email: '',
     kyc_status: 'Pending'
   });
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
@@ -61,30 +59,33 @@ const EmployeeManagement = () => {
     setCurrentEmployee(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCreateOrUpdateEmployee = async (e) => {
+  const handleUpsertEmployee = async (e) => {
     e.preventDefault();
     try {
-      let result;
-      if (currentEmployee.emp_id) {
-        // Update existing employee
-        result = await supabase
-          .from('employees')
-          .update(currentEmployee)
-          .eq('emp_id', currentEmployee.emp_id);
-      } else {
-        // Create new employee
-        result = await supabase
-          .from('employees')
-          .insert([currentEmployee]);
-      }
+      const { data, error } = await supabase
+        .from('employees')
+        .upsert(currentEmployee, { onConflict: 'emp_id' });
 
-      if (result.error) throw result.error;
+      if (error) throw error;
 
       toast.success(currentEmployee.emp_id ? 'Employee updated successfully' : 'Employee created successfully');
       setIsDialogOpen(false);
       fetchEmployees();
+      setCurrentEmployee({
+        emp_id: '',
+        name: '',
+        designation: '',
+        date_of_joining: '',
+        phone_no: '',
+        email: '',
+        address: '',
+        dob: '',
+        emergency_contact_no: '',
+        official_email: '',
+        kyc_status: 'Pending'
+      });
     } catch (error) {
-      console.error('Error saving employee:', error);
+      console.error('Error upserting employee:', error);
       toast.error('Failed to save employee');
     }
   };
@@ -128,7 +129,7 @@ const EmployeeManagement = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Employee Management</CardTitle>
-          <Button onClick={() => { setCurrentEmployee({}); setIsDialogOpen(true); }}>
+          <Button onClick={() => { setCurrentEmployee({ ...currentEmployee, kyc_status: 'Pending' }); setIsDialogOpen(true); }}>
             <Plus className="h-4 w-4 mr-2" /> Create New Employee
           </Button>
         </CardHeader>
@@ -182,7 +183,7 @@ const EmployeeManagement = () => {
           <DialogHeader>
             <DialogTitle>{currentEmployee.emp_id ? 'Edit Employee' : 'Create New Employee'}</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleCreateOrUpdateEmployee} className="space-y-4">
+          <form onSubmit={handleUpsertEmployee} className="space-y-4">
             <div>
               <Label htmlFor="emp_id">Employee ID</Label>
               <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required />
@@ -222,6 +223,10 @@ const EmployeeManagement = () => {
             <div>
               <Label htmlFor="address">Address</Label>
               <Input id="address" name="address" value={currentEmployee.address || ''} onChange={handleInputChange} />
+            </div>
+            <div>
+              <Label htmlFor="kyc_status">KYC Status</Label>
+              <Input id="kyc_status" name="kyc_status" value={currentEmployee.kyc_status || 'Pending'} onChange={handleInputChange} required />
             </div>
             <div className="flex justify-end space-x-2">
               <Button type="submit">
