@@ -22,6 +22,8 @@ const EmployeeDetails = () => {
   const [selectedDocumentId, setSelectedDocumentId] = useState(null);
   const [isEditing, setIsEditing] = useState(location.state?.isEditing || false);
   const [editedEmployee, setEditedEmployee] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchEmployeeDetails();
@@ -29,6 +31,8 @@ const EmployeeDetails = () => {
   }, [empId]);
 
   const fetchEmployeeDetails = async () => {
+    setIsLoading(true);
+    setError(null);
     try {
       const { data, error } = await supabase
         .from('employees')
@@ -41,7 +45,10 @@ const EmployeeDetails = () => {
       setEditedEmployee(data);
     } catch (error) {
       console.error('Error fetching employee details:', error);
+      setError('Failed to fetch employee details. Please try again.');
       toast.error('Failed to fetch employee details');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -135,8 +142,16 @@ const EmployeeDetails = () => {
     }
   };
 
-  if (!employee) {
+  if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
+  if (!employee) {
+    return <div>No employee found</div>;
   }
 
   return (
