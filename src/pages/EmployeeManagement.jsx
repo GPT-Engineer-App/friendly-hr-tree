@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,6 @@ const EmployeeManagement = () => {
     kyc_status: 'Pending'
   });
   const [errorMessages, setErrorMessages] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();

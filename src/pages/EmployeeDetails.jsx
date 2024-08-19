@@ -98,40 +98,8 @@ const EmployeeDetails = () => {
     }
   };
 
-  const handleCancel = () => {
-    navigate('/admin/employee-management');
-  };
-
-  const handleApprove = async (documentId) => {
-    try {
-      const { error } = await supabase
-        .from('employee_documents')
-        .update({ status: 'approved' })
-        .eq('id', documentId);
-
-      if (error) throw error;
-      toast.success('Document approved successfully');
-      fetchEmployeeDocuments();
-    } catch (error) {
-      console.error('Error approving document:', error);
-      toast.error('Failed to approve document: ' + error.message);
-    }
-  };
-
-  const handleReject = async (documentId, rejectReason) => {
-    try {
-      const { error } = await supabase
-        .from('employee_documents')
-        .update({ status: 'rejected', reject_reason: rejectReason })
-        .eq('id', documentId);
-
-      if (error) throw error;
-      toast.success('Document rejected');
-      fetchEmployeeDocuments();
-    } catch (error) {
-      console.error('Error rejecting document:', error);
-      toast.error('Failed to reject document: ' + error.message);
-    }
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
   };
 
   if (isLoading) {
@@ -161,7 +129,7 @@ const EmployeeDetails = () => {
             <CardHeader>
               <CardTitle className="flex justify-between items-center">
                 Employee Information
-                <Button onClick={() => setIsEditing(!isEditing)}>
+                <Button onClick={toggleEditMode}>
                   {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
                   {isEditing ? 'Save' : 'Edit'}
                 </Button>
@@ -216,7 +184,7 @@ const EmployeeDetails = () => {
                     <Button type="submit" disabled={isLoading}>
                       {isLoading ? 'Saving...' : 'Save Changes'}
                     </Button>
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                    <Button type="button" variant="outline" onClick={toggleEditMode}>Cancel</Button>
                   </div>
                 )}
               </form>
@@ -267,34 +235,6 @@ const EmployeeDetails = () => {
                               )}
                             </DialogContent>
                           </Dialog>
-                          {doc.status === 'pending' && (
-                            <>
-                              <Button onClick={() => handleApprove(doc.id)} className="bg-green-500 hover:bg-green-600">
-                                <Check className="h-4 w-4 mr-2" /> Approve
-                              </Button>
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="destructive">
-                                    <X className="h-4 w-4 mr-2" /> Reject
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Reject Document</DialogTitle>
-                                  </DialogHeader>
-                                  <form onSubmit={(e) => {
-                                    e.preventDefault();
-                                    const reason = e.target.rejectReason.value;
-                                    handleReject(doc.id, reason);
-                                  }}>
-                                    <Label htmlFor="rejectReason">Reason for Rejection</Label>
-                                    <Textarea id="rejectReason" name="rejectReason" required />
-                                    <Button type="submit" className="mt-2">Submit Rejection</Button>
-                                  </form>
-                                </DialogContent>
-                              </Dialog>
-                            </>
-                          )}
                         </div>
                       </TableCell>
                     </TableRow>
