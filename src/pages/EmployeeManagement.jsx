@@ -18,8 +18,15 @@ const EmployeeManagement = () => {
   const [currentEmployee, setCurrentEmployee] = useState({
     emp_id: '',
     name: '',
-    email: '',
     designation: '',
+    date_of_joining: '',
+    phone_no: '',
+    email: '',
+    address: '',
+    dob: '',
+    emergency_contact_no: '',
+    official_email: '',
+    kyc_status: 'Pending'
   });
   const navigate = useNavigate();
 
@@ -95,10 +102,7 @@ const EmployeeManagement = () => {
           .delete()
           .eq('emp_id', emp_id);
 
-        if (error) {
-          console.error('Supabase delete error:', error);
-          throw new Error(error.message || 'Failed to delete employee');
-        }
+        if (error) throw error;
         
         toast.success('Employee deleted successfully');
         fetchEmployees();
@@ -144,6 +148,7 @@ const EmployeeManagement = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Designation</TableHead>
+                <TableHead>KYC Status</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -154,6 +159,7 @@ const EmployeeManagement = () => {
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
                   <TableCell>{employee.designation}</TableCell>
+                  <TableCell>{employee.kyc_status}</TableCell>
                   <TableCell>
                     <div className="flex space-x-2">
                       <Button onClick={() => handleEdit(employee)}>
@@ -190,8 +196,32 @@ const EmployeeManagement = () => {
               <Input id="email" name="email" type="email" value={currentEmployee.email || ''} onChange={handleInputChange} required />
             </div>
             <div>
+              <Label htmlFor="official_email">Official Email</Label>
+              <Input id="official_email" name="official_email" type="email" value={currentEmployee.official_email || ''} onChange={handleInputChange} required />
+            </div>
+            <div>
               <Label htmlFor="designation">Designation</Label>
               <Input id="designation" name="designation" value={currentEmployee.designation || ''} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="date_of_joining">Date of Joining</Label>
+              <Input id="date_of_joining" name="date_of_joining" type="date" value={currentEmployee.date_of_joining || ''} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="phone_no">Phone Number</Label>
+              <Input id="phone_no" name="phone_no" value={currentEmployee.phone_no || ''} onChange={handleInputChange} required />
+            </div>
+            <div>
+              <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
+              <Input id="emergency_contact_no" name="emergency_contact_no" value={currentEmployee.emergency_contact_no || ''} onChange={handleInputChange} />
+            </div>
+            <div>
+              <Label htmlFor="dob">Date of Birth</Label>
+              <Input id="dob" name="dob" type="date" value={currentEmployee.dob || ''} onChange={handleInputChange} />
+            </div>
+            <div>
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" name="address" value={currentEmployee.address || ''} onChange={handleInputChange} />
             </div>
             <div className="flex justify-end space-x-2">
               <Button type="submit">
