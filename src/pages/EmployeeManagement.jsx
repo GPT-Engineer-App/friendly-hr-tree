@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
@@ -28,6 +29,7 @@ const EmployeeManagement = () => {
     official_email: '',
     kyc_status: 'Pending'
   });
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     fetchEmployees();
@@ -62,21 +64,28 @@ const EmployeeManagement = () => {
 
   const handleUpsertEmployee = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
     try {
       const { data, error } = await supabase
         .from('employees')
         .upsert(currentEmployee, { onConflict: 'emp_id' });
 
-      if (error) throw error;
-
-      toast.success(isEditDialogOpen ? 'Employee updated successfully' : 'Employee created successfully');
-      setIsEditDialogOpen(false);
-      setIsCreateDialogOpen(false);
-      fetchEmployees();
-      resetEmployeeForm();
+      if (error) {
+        if (error.code === '23505' && error.message.includes('employees_email_key')) {
+          setErrorMessage('An employee with this email already exists. Please use a different email.');
+        } else {
+          throw error;
+        }
+      } else {
+        toast.success(isEditDialogOpen ? 'Employee updated successfully' : 'Employee created successfully');
+        setIsEditDialogOpen(false);
+        setIsCreateDialogOpen(false);
+        fetchEmployees();
+        resetEmployeeForm();
+      }
     } catch (error) {
       console.error('Error upserting employee:', error);
-      toast.error('Failed to save employee');
+      toast.error('Failed to save employee: ' + error.message);
     }
   };
 
@@ -118,6 +127,7 @@ const EmployeeManagement = () => {
       official_email: '',
       kyc_status: 'Pending'
     });
+    setErrorMessage('');
   };
 
   const openCreateDialog = () => {
@@ -196,6 +206,12 @@ const EmployeeManagement = () => {
             <DialogTitle>Edit Employee</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div>
               <Label htmlFor="emp_id">Employee ID</Label>
               <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required disabled />
@@ -255,6 +271,12 @@ const EmployeeManagement = () => {
             <DialogTitle>Create New Employee</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
+            {errorMessage && (
+              <Alert variant="destructive">
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
             <div>
               <Label htmlFor="emp_id">Employee ID</Label>
               <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required />
