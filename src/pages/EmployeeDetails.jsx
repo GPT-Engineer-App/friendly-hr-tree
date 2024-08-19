@@ -15,18 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 const EmployeeDetails = () => {
   const { empId } = useParams();
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState({
-    emp_id: '',
-    name: '',
-    email: '',
-    official_email: '',
-    designation: '',
-    date_of_joining: '',
-    phone_no: '',
-    emergency_contact_no: '',
-    dob: '',
-    address: ''
-  });
+  const [employee, setEmployee] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -37,6 +26,7 @@ const EmployeeDetails = () => {
       fetchEmployeeDetails();
       fetchEmployeeDocuments();
     } else {
+      setError('No employee ID provided');
       setIsLoading(false);
     }
   }, [empId]);
@@ -149,6 +139,10 @@ const EmployeeDetails = () => {
 
   if (error) {
     return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
+  }
+
+  if (!employee) {
+    return <div className="flex justify-center items-center h-screen text-red-500">Employee not found</div>;
   }
 
   return (
