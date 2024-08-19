@@ -46,6 +46,7 @@ const EmployeeDetails = () => {
 
       if (error) throw error;
       if (data) {
+        console.log('Fetched employee data:', data);
         setEmployee(data);
       } else {
         throw new Error('Employee not found');
@@ -61,7 +62,11 @@ const EmployeeDetails = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEmployee(prev => ({ ...prev, [name]: value }));
+    setEmployee(prev => {
+      const updatedEmployee = { ...prev, [name]: value };
+      console.log('Updated employee state:', updatedEmployee);
+      return updatedEmployee;
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -78,6 +83,7 @@ const EmployeeDetails = () => {
       const { error } = result;
       if (error) throw error;
 
+      console.log('Employee saved successfully:', employee);
       toast.success(empId === 'new' ? 'Employee created successfully' : 'Employee information updated successfully');
       navigate('/admin/employee-management');
     } catch (error) {
