@@ -21,11 +21,36 @@ const EmployeeManagement = () => {
     email: '',
     designation: '',
   });
+  const [tableInfo, setTableInfo] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
+    fetchTableInfo();
   }, []);
+
+  const fetchTableInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('*')
+        .limit(0);
+
+      if (error) throw error;
+
+      if (data) {
+        const columnInfo = Object.keys(data[0] || {}).map(column => ({
+          name: column,
+          type: typeof data[0][column]
+        }));
+        setTableInfo(columnInfo);
+        console.log('Table Info:', columnInfo);
+      }
+    } catch (error) {
+      console.error('Error fetching table info:', error);
+      toast.error('Failed to fetch table information');
+    }
+  };
 
   const fetchEmployees = async () => {
     setIsLoading(true);
