@@ -29,7 +29,7 @@ const EmployeeManagement = () => {
     official_email: '',
     kyc_status: 'Pending'
   });
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessages, setErrorMessages] = useState([]);
 
   useEffect(() => {
     fetchEmployees();
@@ -64,15 +64,20 @@ const EmployeeManagement = () => {
 
   const handleUpsertEmployee = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    setErrorMessages([]);
     try {
       const { data, error } = await supabase
         .from('employees')
         .upsert(currentEmployee, { onConflict: 'emp_id' });
 
       if (error) {
-        if (error.code === '23505' && error.message.includes('employees_email_key')) {
-          setErrorMessage('An employee with this email already exists. Please use a different email.');
+        if (error.code === '23505') {
+          if (error.message.includes('employees_email_key')) {
+            setErrorMessages(prev => [...prev, 'An employee with this email already exists. Please use a different email.']);
+          }
+          if (error.message.includes('employees_official_email_key')) {
+            setErrorMessages(prev => [...prev, 'An employee with this official email already exists. Please use a different official email.']);
+          }
         } else {
           throw error;
         }
@@ -85,7 +90,7 @@ const EmployeeManagement = () => {
       }
     } catch (error) {
       console.error('Error upserting employee:', error);
-      toast.error('Failed to save employee: ' + error.message);
+      setErrorMessages(prev => [...prev, `Failed to save employee: ${error.message}`]);
     }
   };
 
@@ -127,7 +132,7 @@ const EmployeeManagement = () => {
       official_email: '',
       kyc_status: 'Pending'
     });
-    setErrorMessage('');
+    setErrorMessages([]);
   };
 
   const openCreateDialog = () => {
@@ -206,10 +211,12 @@ const EmployeeManagement = () => {
             <DialogTitle>Edit Employee</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
-            {errorMessage && (
+            {errorMessages.length > 0 && (
               <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{errorMessage}</AlertDescription>
+                {errorMessages.map((message, index) => (
+                  <AlertDescription key={index}>{message}</AlertDescription>
+                ))}
               </Alert>
             )}
             <div>
@@ -271,10 +278,12 @@ const EmployeeManagement = () => {
             <DialogTitle>Create New Employee</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
-            {errorMessage && (
+            {errorMessages.length > 0 && (
               <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{errorMessage}</AlertDescription>
+                {errorMessages.map((message, index) => (
+                  <AlertDescription key={index}>{message}</AlertDescription>
+                ))}
               </Alert>
             )}
             <div>
