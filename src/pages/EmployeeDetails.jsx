@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const EmployeeDetails = () => {
+  console.log('EmployeeDetails component rendered');
   const { empId } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState({
@@ -27,7 +28,7 @@ const EmployeeDetails = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    console.log('EmployeeDetails component mounted. empId:', empId);
+    console.log('EmployeeDetails useEffect triggered. empId:', empId);
     if (empId !== 'new') {
       fetchEmployeeDetails();
     } else {
@@ -46,6 +47,8 @@ const EmployeeDetails = () => {
         .select('*')
         .eq('emp_id', empId)
         .single();
+
+      console.log('Supabase query result:', { data, error });
 
       if (error) throw error;
       if (data) {
@@ -87,6 +90,8 @@ const EmployeeDetails = () => {
         result = await supabase.from('employees').update(employee).eq('emp_id', empId);
       }
 
+      console.log('Supabase operation result:', result);
+
       const { error } = result;
       if (error) throw error;
 
@@ -105,6 +110,10 @@ const EmployeeDetails = () => {
     console.log('Cancelling form submission. Navigating back to employee management.');
     navigate('/admin/employee-management');
   };
+
+  console.log('Current employee state:', employee);
+  console.log('isLoading:', isLoading);
+  console.log('error:', error);
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
