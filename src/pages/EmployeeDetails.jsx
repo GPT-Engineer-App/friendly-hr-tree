@@ -49,7 +49,10 @@ const EmployeeDetails = () => {
 
       console.log('Supabase query result:', { data, error });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       if (data) {
         console.log('Employee data fetched successfully:', data);
         setEmployee(data);
@@ -60,7 +63,7 @@ const EmployeeDetails = () => {
     } catch (error) {
       console.error('Error fetching employee details:', error);
       setError('Failed to fetch employee details. Please try again.');
-      toast.error('Failed to fetch employee details');
+      toast.error('Failed to fetch employee details: ' + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -99,7 +102,7 @@ const EmployeeDetails = () => {
       navigate('/admin/employee-management');
     } catch (error) {
       console.error('Error saving employee:', error);
-      toast.error('Failed to save employee information');
+      toast.error('Failed to save employee information: ' + error.message);
     } finally {
       setIsLoading(false);
     }
