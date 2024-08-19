@@ -11,7 +11,18 @@ import { Textarea } from "@/components/ui/textarea";
 const EmployeeDetails = () => {
   const { empId } = useParams();
   const navigate = useNavigate();
-  const [employee, setEmployee] = useState(null);
+  const [employee, setEmployee] = useState({
+    emp_id: '',
+    name: '',
+    email: '',
+    official_email: '',
+    designation: '',
+    date_of_joining: '',
+    phone_no: '',
+    emergency_contact_no: '',
+    dob: '',
+    address: ''
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -19,18 +30,6 @@ const EmployeeDetails = () => {
     if (empId !== 'new') {
       fetchEmployeeDetails();
     } else {
-      setEmployee({
-        emp_id: '',
-        name: '',
-        email: '',
-        official_email: '',
-        designation: '',
-        date_of_joining: '',
-        phone_no: '',
-        emergency_contact_no: '',
-        dob: '',
-        address: ''
-      });
       setIsLoading(false);
     }
   }, [empId]);
@@ -46,7 +45,7 @@ const EmployeeDetails = () => {
         .single();
 
       if (error) throw error;
-      setEmployee(data);
+      setEmployee(data || {});
     } catch (error) {
       console.error('Error fetching employee details:', error);
       setError('Failed to fetch employee details. Please try again.');
@@ -63,6 +62,7 @@ const EmployeeDetails = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
     try {
       let result;
       if (empId === 'new') {
@@ -79,6 +79,8 @@ const EmployeeDetails = () => {
     } catch (error) {
       console.error('Error saving employee:', error);
       toast.error('Failed to save employee information');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -143,7 +145,9 @@ const EmployeeDetails = () => {
               <Textarea id="address" name="address" value={employee.address} onChange={handleInputChange} />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button type="submit">Save Changes</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
               <Button type="button" variant="outline" onClick={() => navigate('/admin/employee-management')}>Cancel</Button>
             </div>
           </form>
