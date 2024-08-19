@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, Edit, Trash2, Plus } from 'lucide-react';
+import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EmployeeManagement = () => {
@@ -31,6 +31,7 @@ const EmployeeManagement = () => {
     kyc_status: 'Pending'
   });
   const [errorMessages, setErrorMessages] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
@@ -144,8 +145,14 @@ const EmployeeManagement = () => {
   const filteredEmployees = employees.filter(emp =>
     emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp.emp_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    emp.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.designation?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.official_email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewDetails = (empId) => {
+    navigate(`/admin/employee-details/${empId}`);
+  };
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -175,26 +182,23 @@ const EmployeeManagement = () => {
                 <TableRow>
                   <TableHead className="w-[100px]">Employee ID</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead className="hidden md:table-cell">Email</TableHead>
-                  <TableHead className="hidden lg:table-cell">Designation</TableHead>
-                  <TableHead className="hidden xl:table-cell">KYC Status</TableHead>
+                  <TableHead>Designation</TableHead>
+                  <TableHead>Official Email</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEmployees.map((employee) => (
                   <TableRow key={employee.emp_id}>
-                    <TableCell className="font-medium">
-                      <Link to={`/admin/employee-details/${employee.emp_id}`} className="text-blue-600 hover:underline">
-                        {employee.emp_id}
-                      </Link>
-                    </TableCell>
+                    <TableCell className="font-medium">{employee.emp_id}</TableCell>
                     <TableCell>{employee.name}</TableCell>
-                    <TableCell className="hidden md:table-cell">{employee.email}</TableCell>
-                    <TableCell className="hidden lg:table-cell">{employee.designation}</TableCell>
-                    <TableCell className="hidden xl:table-cell">{employee.kyc_status}</TableCell>
+                    <TableCell>{employee.designation}</TableCell>
+                    <TableCell>{employee.official_email}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
+                        <Button onClick={() => handleViewDetails(employee.emp_id)} size="sm">
+                          <Eye className="h-4 w-4 mr-2" /> View
+                        </Button>
                         <Button onClick={() => handleEdit(employee)} size="sm">
                           <Edit className="h-4 w-4" />
                         </Button>
