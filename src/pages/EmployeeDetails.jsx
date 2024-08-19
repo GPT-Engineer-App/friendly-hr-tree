@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -67,7 +67,7 @@ const EmployeeDetails = () => {
       setDocuments(data || []);
     } catch (error) {
       console.error('Error fetching employee documents:', error);
-      toast.error('Failed to fetch employee documents');
+      toast.error('Failed to fetch employee documents: ' + error.message);
     }
   };
 
@@ -113,7 +113,7 @@ const EmployeeDetails = () => {
       fetchEmployeeDocuments();
     } catch (error) {
       console.error('Error approving document:', error);
-      toast.error('Failed to approve document');
+      toast.error('Failed to approve document: ' + error.message);
     }
   };
 
@@ -129,12 +129,12 @@ const EmployeeDetails = () => {
       fetchEmployeeDocuments();
     } catch (error) {
       console.error('Error rejecting document:', error);
-      toast.error('Failed to reject document');
+      toast.error('Failed to reject document: ' + error.message);
     }
   };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading employee details...</div>;
   }
 
   if (error) {
@@ -147,7 +147,7 @@ const EmployeeDetails = () => {
 
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Employee Details</h2>
+      <h2 className="text-2xl font-bold mb-4">Employee Details - {employee.name} ({employee.emp_id})</h2>
       
       <Tabs defaultValue="info" className="w-full">
         <TabsList>
