@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 const EmployeeDetails = () => {
-  console.log('EmployeeDetails component rendered');
   const { empId } = useParams();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState({
@@ -29,10 +28,10 @@ const EmployeeDetails = () => {
 
   useEffect(() => {
     console.log('EmployeeDetails useEffect triggered. empId:', empId);
-    if (empId !== 'new') {
+    if (empId && empId !== 'new') {
       fetchEmployeeDetails();
     } else {
-      console.log('Creating new employee. Form reset to default values.');
+      console.log('Creating new employee or no empId provided. Form reset to default values.');
       setIsLoading(false);
     }
   }, [empId]);
@@ -111,9 +110,7 @@ const EmployeeDetails = () => {
     navigate('/admin/employee-management');
   };
 
-  console.log('Current employee state:', employee);
-  console.log('isLoading:', isLoading);
-  console.log('error:', error);
+  console.log('Rendering EmployeeDetails. Current state:', { employee, isLoading, error });
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
