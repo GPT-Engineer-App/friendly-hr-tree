@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { Search, Check, X, Eye } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Link } from 'react-router-dom';
 
 const documentTypes = {
@@ -93,6 +93,24 @@ const KYCApproval = () => {
           ))}
         </TableBody>
       </Table>
+
+      <Dialog>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Employee Documents</DialogTitle>
+            <DialogDescription>
+              Review and approve KYC documents for the selected employee.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedEmployee && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">{selectedEmployee.name}</h3>
+              <p className="mb-4">Employee ID: {selectedEmployee.emp_id}</p>
+              {/* Add more content for document review here */}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
