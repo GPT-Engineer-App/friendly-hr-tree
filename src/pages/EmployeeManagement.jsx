@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -183,7 +184,11 @@ const EmployeeManagement = () => {
               <TableBody>
                 {filteredEmployees.map((employee) => (
                   <TableRow key={employee.emp_id}>
-                    <TableCell className="font-medium">{employee.emp_id}</TableCell>
+                    <TableCell className="font-medium">
+                      <Link to={`/admin/employee-details/${employee.emp_id}`} className="text-blue-600 hover:underline">
+                        {employee.emp_id}
+                      </Link>
+                    </TableCell>
                     <TableCell>{employee.name}</TableCell>
                     <TableCell className="hidden md:table-cell">{employee.email}</TableCell>
                     <TableCell className="hidden lg:table-cell">{employee.designation}</TableCell>
