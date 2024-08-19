@@ -88,6 +88,10 @@ const EmployeeDetails = () => {
     }
   };
 
+  const handleCancel = () => {
+    navigate('/admin/employee-management');
+  };
+
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -152,7 +156,7 @@ const EmployeeDetails = () => {
               <Button type="submit" disabled={isLoading}>
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate('/admin/employee-management')}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
             </div>
           </form>
         </CardContent>
