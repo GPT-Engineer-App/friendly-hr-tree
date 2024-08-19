@@ -45,7 +45,11 @@ const EmployeeDetails = () => {
         .single();
 
       if (error) throw error;
-      setEmployee(data || {});
+      if (data) {
+        setEmployee(data);
+      } else {
+        throw new Error('Employee not found');
+      }
     } catch (error) {
       console.error('Error fetching employee details:', error);
       setError('Failed to fetch employee details. Please try again.');
@@ -105,7 +109,7 @@ const EmployeeDetails = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="emp_id">Employee ID</Label>
-                <Input id="emp_id" name="emp_id" value={employee.emp_id} onChange={handleInputChange} required />
+                <Input id="emp_id" name="emp_id" value={employee.emp_id} onChange={handleInputChange} required disabled={empId !== 'new'} />
               </div>
               <div>
                 <Label htmlFor="name">Name</Label>

@@ -55,6 +55,24 @@ const EmployeeManagement = () => {
     navigate(`/admin/employee-details/${empId}`);
   };
 
+  const handleDelete = async (empId) => {
+    if (window.confirm('Are you sure you want to delete this employee?')) {
+      try {
+        const { error } = await supabase
+          .from('employees')
+          .delete()
+          .eq('emp_id', empId);
+
+        if (error) throw error;
+        toast.success('Employee deleted successfully');
+        fetchEmployees();
+      } catch (error) {
+        console.error('Error deleting employee:', error);
+        toast.error('Failed to delete employee');
+      }
+    }
+  };
+
   const filteredEmployees = employees.filter(emp =>
     emp && emp.name && emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     emp && emp.emp_id && emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -110,7 +128,7 @@ const EmployeeManagement = () => {
                         <Button className="p-2" onClick={() => handleEdit(employee.emp_id)}>
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="destructive" className="p-2">
+                        <Button variant="destructive" className="p-2" onClick={() => handleDelete(employee.emp_id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
