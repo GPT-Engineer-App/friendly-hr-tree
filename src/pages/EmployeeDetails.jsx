@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useLocation, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,14 +13,13 @@ import { Textarea } from "@/components/ui/textarea";
 
 const EmployeeDetails = () => {
   const { empId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
   const [documents, setDocuments] = useState([]);
   const [rejectReason, setRejectReason] = useState('');
   const [showRejectDialog, setShowRejectDialog] = useState(false);
   const [selectedDocumentId, setSelectedDocumentId] = useState(null);
-  const [isEditing, setIsEditing] = useState(location.state?.isEditing || false);
+  const [isEditing, setIsEditing] = useState(false);
   const [editedEmployee, setEditedEmployee] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -135,7 +134,6 @@ const EmployeeDetails = () => {
       toast.success('Employee information updated successfully');
       setEmployee(editedEmployee);
       setIsEditing(false);
-      navigate('/admin/employee-management');
     } catch (error) {
       console.error('Error updating employee:', error);
       toast.error('Failed to update employee information');

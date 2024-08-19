@@ -66,7 +66,7 @@ const EmployeeManagement = () => {
   };
 
   const handleEdit = (empId) => {
-    navigate(`/admin/employee-details/${empId}`, { state: { isEditing: true } });
+    navigate(`/admin/employee-details/${empId}`);
   };
 
   const handleInputChange = (e) => {
