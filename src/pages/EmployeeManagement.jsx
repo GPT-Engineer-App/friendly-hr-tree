@@ -21,36 +21,11 @@ const EmployeeManagement = () => {
     email: '',
     designation: '',
   });
-  const [tableInfo, setTableInfo] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
-    fetchTableInfo();
   }, []);
-
-  const fetchTableInfo = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('employees')
-        .select('*')
-        .limit(0);
-
-      if (error) throw error;
-
-      if (data) {
-        const columnInfo = Object.keys(data[0] || {}).map(column => ({
-          name: column,
-          type: typeof data[0][column]
-        }));
-        setTableInfo(columnInfo);
-        console.log('Table Info:', columnInfo);
-      }
-    } catch (error) {
-      console.error('Error fetching table info:', error);
-      toast.error('Failed to fetch table information');
-    }
-  };
 
   const fetchEmployees = async () => {
     setIsLoading(true);
@@ -83,12 +58,12 @@ const EmployeeManagement = () => {
     e.preventDefault();
     try {
       let result;
-      if (currentEmployee.id) {
+      if (currentEmployee.emp_id) {
         // Update existing employee
         result = await supabase
           .from('employees')
           .update(currentEmployee)
-          .eq('id', currentEmployee.id);
+          .eq('emp_id', currentEmployee.emp_id);
       } else {
         // Create new employee
         result = await supabase
@@ -98,7 +73,7 @@ const EmployeeManagement = () => {
 
       if (result.error) throw result.error;
 
-      toast.success(currentEmployee.id ? 'Employee updated successfully' : 'Employee created successfully');
+      toast.success(currentEmployee.emp_id ? 'Employee updated successfully' : 'Employee created successfully');
       setIsDialogOpen(false);
       fetchEmployees();
     } catch (error) {
@@ -112,13 +87,13 @@ const EmployeeManagement = () => {
     setIsDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (emp_id) => {
     if (window.confirm('Are you sure you want to delete this employee?')) {
       try {
         const { error } = await supabase
           .from('employees')
           .delete()
-          .eq('id', id);
+          .eq('emp_id', emp_id);
 
         if (error) {
           console.error('Supabase delete error:', error);
@@ -174,7 +149,7 @@ const EmployeeManagement = () => {
             </TableHeader>
             <TableBody>
               {filteredEmployees.map((employee) => (
-                <TableRow key={employee.id}>
+                <TableRow key={employee.emp_id}>
                   <TableCell>{employee.emp_id}</TableCell>
                   <TableCell>{employee.name}</TableCell>
                   <TableCell>{employee.email}</TableCell>
@@ -184,7 +159,7 @@ const EmployeeManagement = () => {
                       <Button onClick={() => handleEdit(employee)}>
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="destructive" onClick={() => handleDelete(employee.id)}>
+                      <Button variant="destructive" onClick={() => handleDelete(employee.emp_id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -199,7 +174,7 @@ const EmployeeManagement = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{currentEmployee.id ? 'Edit Employee' : 'Create New Employee'}</DialogTitle>
+            <DialogTitle>{currentEmployee.emp_id ? 'Edit Employee' : 'Create New Employee'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleCreateOrUpdateEmployee} className="space-y-4">
             <div>
@@ -220,7 +195,7 @@ const EmployeeManagement = () => {
             </div>
             <div className="flex justify-end space-x-2">
               <Button type="submit">
-                {currentEmployee.id ? 'Update Employee' : 'Create Employee'}
+                {currentEmployee.emp_id ? 'Update Employee' : 'Create Employee'}
               </Button>
               <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
                 Cancel
