@@ -8,14 +8,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Search, Trash2, Plus, Eye } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [currentEmployee, setCurrentEmployee] = useState({
     emp_id: '',
@@ -84,8 +83,7 @@ const EmployeeManagement = () => {
           throw error;
         }
       } else {
-        toast.success(isEditDialogOpen ? 'Employee updated successfully' : 'Employee created successfully');
-        setIsEditDialogOpen(false);
+        toast.success('Employee created successfully');
         setIsCreateDialogOpen(false);
         fetchEmployees();
         resetEmployeeForm();
@@ -94,11 +92,6 @@ const EmployeeManagement = () => {
       console.error('Error upserting employee:', error);
       setErrorMessages(prev => [...prev, `Failed to save employee: ${error.message}`]);
     }
-  };
-
-  const handleEdit = (employee) => {
-    setCurrentEmployee(employee);
-    setIsEditDialogOpen(true);
   };
 
   const handleDelete = async (emp_id) => {
@@ -150,10 +143,6 @@ const EmployeeManagement = () => {
     emp.official_email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleViewDetails = (empId) => {
-    navigate(`/admin/employee-details/${empId}`);
-  };
-
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -196,12 +185,11 @@ const EmployeeManagement = () => {
                     <TableCell>{employee.official_email}</TableCell>
                     <TableCell>
                       <div className="flex space-x-2">
-                        <Button onClick={() => handleViewDetails(employee.emp_id)} size="sm">
-                          <Eye className="h-4 w-4 mr-2" /> View
-                        </Button>
-                        <Button onClick={() => handleEdit(employee)} size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
+                        <Link to={`/admin/employee-details/${employee.emp_id}`}>
+                          <Button size="sm">
+                            <Eye className="h-4 w-4 mr-2" /> View
+                          </Button>
+                        </Link>
                         <Button variant="destructive" onClick={() => handleDelete(employee.emp_id)} size="sm">
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -215,14 +203,13 @@ const EmployeeManagement = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={isEditDialogOpen || isCreateDialogOpen} onOpenChange={() => {
-        setIsEditDialogOpen(false);
+      <Dialog open={isCreateDialogOpen} onOpenChange={() => {
         setIsCreateDialogOpen(false);
         resetEmployeeForm();
       }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>{isEditDialogOpen ? 'Edit Employee' : 'Create New Employee'}</DialogTitle>
+            <DialogTitle>Create New Employee</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
             {errorMessages.length > 0 && (
@@ -236,7 +223,7 @@ const EmployeeManagement = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="emp_id">Employee ID</Label>
-                <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required disabled={isEditDialogOpen} />
+                <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="name">Name</Label>
@@ -280,9 +267,8 @@ const EmployeeManagement = () => {
               <Input id="address" name="address" value={currentEmployee.address || ''} onChange={handleInputChange} />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button type="submit">{isEditDialogOpen ? 'Update Employee' : 'Create Employee'}</Button>
+              <Button type="submit">Create Employee</Button>
               <Button type="button" variant="outline" onClick={() => {
-                setIsEditDialogOpen(false);
                 setIsCreateDialogOpen(false);
                 resetEmployeeForm();
               }}>Cancel</Button>

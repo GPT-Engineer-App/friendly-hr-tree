@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Eye, Check, X } from 'lucide-react';
+import { Eye, Check, X, Edit, Save } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 const EmployeeDetails = () => {
@@ -20,6 +20,7 @@ const EmployeeDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (empId) {
@@ -88,7 +89,7 @@ const EmployeeDetails = () => {
       if (error) throw error;
 
       toast.success('Employee information updated successfully');
-      navigate('/admin/employee-management');
+      setIsEditing(false);
     } catch (error) {
       console.error('Error saving employee:', error);
       toast.error('Failed to save employee information: ' + error.message);
@@ -158,7 +159,13 @@ const EmployeeDetails = () => {
         <TabsContent value="info">
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle>Employee Information</CardTitle>
+              <CardTitle className="flex justify-between items-center">
+                Employee Information
+                <Button onClick={() => setIsEditing(!isEditing)}>
+                  {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                  {isEditing ? 'Save' : 'Edit'}
+                </Button>
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -169,47 +176,49 @@ const EmployeeDetails = () => {
                   </div>
                   <div>
                     <Label htmlFor="name">Name</Label>
-                    <Input id="name" name="name" value={employee.name} onChange={handleInputChange} required />
+                    <Input id="name" name="name" value={employee.name} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="email">Personal Email</Label>
-                    <Input id="email" name="email" type="email" value={employee.email} onChange={handleInputChange} required />
+                    <Input id="email" name="email" type="email" value={employee.email} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="official_email">Official Email</Label>
-                    <Input id="official_email" name="official_email" type="email" value={employee.official_email} onChange={handleInputChange} required />
+                    <Input id="official_email" name="official_email" type="email" value={employee.official_email} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="designation">Designation</Label>
-                    <Input id="designation" name="designation" value={employee.designation} onChange={handleInputChange} required />
+                    <Input id="designation" name="designation" value={employee.designation} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="date_of_joining">Date of Joining</Label>
-                    <Input id="date_of_joining" name="date_of_joining" type="date" value={employee.date_of_joining} onChange={handleInputChange} required />
+                    <Input id="date_of_joining" name="date_of_joining" type="date" value={employee.date_of_joining} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="phone_no">Phone Number</Label>
-                    <Input id="phone_no" name="phone_no" value={employee.phone_no} onChange={handleInputChange} required />
+                    <Input id="phone_no" name="phone_no" value={employee.phone_no} onChange={handleInputChange} required disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
-                    <Input id="emergency_contact_no" name="emergency_contact_no" value={employee.emergency_contact_no} onChange={handleInputChange} />
+                    <Input id="emergency_contact_no" name="emergency_contact_no" value={employee.emergency_contact_no} onChange={handleInputChange} disabled={!isEditing} />
                   </div>
                   <div>
                     <Label htmlFor="dob">Date of Birth</Label>
-                    <Input id="dob" name="dob" type="date" value={employee.dob} onChange={handleInputChange} />
+                    <Input id="dob" name="dob" type="date" value={employee.dob} onChange={handleInputChange} disabled={!isEditing} />
                   </div>
                 </div>
                 <div>
                   <Label htmlFor="address">Address</Label>
-                  <Textarea id="address" name="address" value={employee.address} onChange={handleInputChange} />
+                  <Textarea id="address" name="address" value={employee.address} onChange={handleInputChange} disabled={!isEditing} />
                 </div>
-                <div className="flex justify-end space-x-2">
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
-                </div>
+                {isEditing && (
+                  <div className="flex justify-end space-x-2">
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? 'Saving...' : 'Save Changes'}
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                  </div>
+                )}
               </form>
             </CardContent>
           </Card>
