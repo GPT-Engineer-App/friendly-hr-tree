@@ -27,14 +27,17 @@ const EmployeeDetails = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    console.log('EmployeeDetails component mounted. empId:', empId);
     if (empId !== 'new') {
       fetchEmployeeDetails();
     } else {
+      console.log('Creating new employee. Form reset to default values.');
       setIsLoading(false);
     }
   }, [empId]);
 
   const fetchEmployeeDetails = async () => {
+    console.log('Fetching employee details for empId:', empId);
     setIsLoading(true);
     setError(null);
     try {
@@ -46,9 +49,10 @@ const EmployeeDetails = () => {
 
       if (error) throw error;
       if (data) {
-        console.log('Fetched employee data:', data);
+        console.log('Employee data fetched successfully:', data);
         setEmployee(data);
       } else {
+        console.log('No employee found with empId:', empId);
         throw new Error('Employee not found');
       }
     } catch (error) {
@@ -64,19 +68,22 @@ const EmployeeDetails = () => {
     const { name, value } = e.target;
     setEmployee(prev => {
       const updatedEmployee = { ...prev, [name]: value };
-      console.log('Updated employee state:', updatedEmployee);
+      console.log('Employee state updated:', updatedEmployee);
       return updatedEmployee;
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log('Form submitted. Current employee state:', employee);
     setIsLoading(true);
     try {
       let result;
       if (empId === 'new') {
+        console.log('Creating new employee...');
         result = await supabase.from('employees').insert([employee]);
       } else {
+        console.log('Updating existing employee...');
         result = await supabase.from('employees').update(employee).eq('emp_id', empId);
       }
 
@@ -95,6 +102,7 @@ const EmployeeDetails = () => {
   };
 
   const handleCancel = () => {
+    console.log('Cancelling form submission. Navigating back to employee management.');
     navigate('/admin/employee-management');
   };
 
