@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,13 +13,15 @@ const EmployeeManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState('emp_id');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchEmployees();
-  }, []);
+  }, [sortField, sortDirection]);
 
   const fetchEmployees = async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('employees')
@@ -31,6 +33,8 @@ const EmployeeManagement = () => {
     } catch (error) {
       console.error('Error fetching employees:', error);
       toast.error('Failed to fetch employees');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -52,10 +56,14 @@ const EmployeeManagement = () => {
   };
 
   const filteredEmployees = employees.filter(emp =>
-    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.email.toLowerCase().includes(searchTerm.toLowerCase())
+    emp && emp.name && emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp && emp.emp_id && emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp && emp.email && emp.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
 
   return (
     <div className="p-4">

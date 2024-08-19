@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,13 +10,29 @@ import { Textarea } from "@/components/ui/textarea";
 
 const EmployeeDetails = () => {
   const { empId } = useParams();
+  const navigate = useNavigate();
   const [employee, setEmployee] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetchEmployeeDetails();
+    if (empId !== 'new') {
+      fetchEmployeeDetails();
+    } else {
+      setEmployee({
+        emp_id: '',
+        name: '',
+        email: '',
+        official_email: '',
+        designation: '',
+        date_of_joining: '',
+        phone_no: '',
+        emergency_contact_no: '',
+        dob: '',
+        address: ''
+      });
+      setIsLoading(false);
+    }
   }, [empId]);
 
   const fetchEmployeeDetails = async () => {
@@ -48,17 +64,21 @@ const EmployeeDetails = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const { error } = await supabase
-        .from('employees')
-        .update(employee)
-        .eq('emp_id', empId);
+      let result;
+      if (empId === 'new') {
+        result = await supabase.from('employees').insert([employee]);
+      } else {
+        result = await supabase.from('employees').update(employee).eq('emp_id', empId);
+      }
 
+      const { error } = result;
       if (error) throw error;
-      toast.success('Employee information updated successfully');
-      setIsEditing(false);
+
+      toast.success(empId === 'new' ? 'Employee created successfully' : 'Employee information updated successfully');
+      navigate('/admin/employee-management');
     } catch (error) {
-      console.error('Error updating employee:', error);
-      toast.error('Failed to update employee information');
+      console.error('Error saving employee:', error);
+      toast.error('Failed to save employee information');
     }
   };
 
@@ -70,13 +90,9 @@ const EmployeeDetails = () => {
     return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
   }
 
-  if (!employee) {
-    return <div className="flex justify-center items-center h-screen">No employee found</div>;
-  }
-
   return (
     <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Employee Details</h2>
+      <h2 className="text-2xl font-bold mb-4">{empId === 'new' ? 'Create New Employee' : 'Edit Employee Details'}</h2>
       
       <Card className="mb-6">
         <CardHeader>
@@ -87,54 +103,48 @@ const EmployeeDetails = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="emp_id">Employee ID</Label>
-                <Input id="emp_id" name="emp_id" value={employee.emp_id} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="emp_id" name="emp_id" value={employee.emp_id} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" name="name" value={employee.name} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="name" name="name" value={employee.name} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="email">Personal Email</Label>
-                <Input id="email" name="email" type="email" value={employee.email} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="email" name="email" type="email" value={employee.email} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="official_email">Official Email</Label>
-                <Input id="official_email" name="official_email" type="email" value={employee.official_email} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="official_email" name="official_email" type="email" value={employee.official_email} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="designation">Designation</Label>
-                <Input id="designation" name="designation" value={employee.designation} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="designation" name="designation" value={employee.designation} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="date_of_joining">Date of Joining</Label>
-                <Input id="date_of_joining" name="date_of_joining" type="date" value={employee.date_of_joining} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="date_of_joining" name="date_of_joining" type="date" value={employee.date_of_joining} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="phone_no">Phone Number</Label>
-                <Input id="phone_no" name="phone_no" value={employee.phone_no} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="phone_no" name="phone_no" value={employee.phone_no} onChange={handleInputChange} required />
               </div>
               <div>
                 <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
-                <Input id="emergency_contact_no" name="emergency_contact_no" value={employee.emergency_contact_no} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="emergency_contact_no" name="emergency_contact_no" value={employee.emergency_contact_no} onChange={handleInputChange} />
               </div>
               <div>
                 <Label htmlFor="dob">Date of Birth</Label>
-                <Input id="dob" name="dob" type="date" value={employee.dob} onChange={handleInputChange} disabled={!isEditing} />
+                <Input id="dob" name="dob" type="date" value={employee.dob} onChange={handleInputChange} />
               </div>
             </div>
             <div>
               <Label htmlFor="address">Address</Label>
-              <Textarea id="address" name="address" value={employee.address} onChange={handleInputChange} disabled={!isEditing} />
+              <Textarea id="address" name="address" value={employee.address} onChange={handleInputChange} />
             </div>
             <div className="flex justify-end space-x-2">
-              {isEditing ? (
-                <>
-                  <Button type="submit">Save Changes</Button>
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
-                </>
-              ) : (
-                <Button type="button" onClick={() => setIsEditing(true)}>Edit</Button>
-              )}
+              <Button type="submit">Save Changes</Button>
+              <Button type="button" variant="outline" onClick={() => navigate('/admin/employee-management')}>Cancel</Button>
             </div>
           </form>
         </CardContent>
