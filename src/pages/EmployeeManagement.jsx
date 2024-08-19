@@ -95,7 +95,11 @@ const EmployeeManagement = () => {
           .delete()
           .eq('id', id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase delete error:', error);
+          throw new Error(error.message || 'Failed to delete employee');
+        }
+        
         toast.success('Employee deleted successfully');
         fetchEmployees();
       } catch (error) {
@@ -106,9 +110,9 @@ const EmployeeManagement = () => {
   };
 
   const filteredEmployees = employees.filter(emp =>
-    emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.emp_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    emp.email.toLowerCase().includes(searchTerm.toLowerCase())
+    emp.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.emp_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    emp.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (isLoading) {
