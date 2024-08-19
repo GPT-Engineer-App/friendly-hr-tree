@@ -151,11 +151,11 @@ const EmployeeManagement = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 max-w-7xl mx-auto">
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Employee Management</CardTitle>
-          <Button onClick={openCreateDialog}>
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0">
+          <CardTitle className="text-2xl font-bold">Employee Management</CardTitle>
+          <Button onClick={openCreateDialog} className="w-full sm:w-auto">
             <Plus className="h-4 w-4 mr-2" /> Create New Employee
           </Button>
         </CardHeader>
@@ -165,50 +165,55 @@ const EmployeeManagement = () => {
               placeholder="Search employees..."
               value={searchTerm}
               onChange={handleSearch}
-              className="max-w-sm"
+              className="max-w-sm w-full"
             />
           </div>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Employee ID</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Designation</TableHead>
-                <TableHead>KYC Status</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredEmployees.map((employee) => (
-                <TableRow key={employee.emp_id}>
-                  <TableCell>{employee.emp_id}</TableCell>
-                  <TableCell>{employee.name}</TableCell>
-                  <TableCell>{employee.email}</TableCell>
-                  <TableCell>{employee.designation}</TableCell>
-                  <TableCell>{employee.kyc_status}</TableCell>
-                  <TableCell>
-                    <div className="flex space-x-2">
-                      <Button onClick={() => handleEdit(employee)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="destructive" onClick={() => handleDelete(employee.emp_id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[100px]">Employee ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden md:table-cell">Email</TableHead>
+                  <TableHead className="hidden lg:table-cell">Designation</TableHead>
+                  <TableHead className="hidden xl:table-cell">KYC Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {filteredEmployees.map((employee) => (
+                  <TableRow key={employee.emp_id}>
+                    <TableCell className="font-medium">{employee.emp_id}</TableCell>
+                    <TableCell>{employee.name}</TableCell>
+                    <TableCell className="hidden md:table-cell">{employee.email}</TableCell>
+                    <TableCell className="hidden lg:table-cell">{employee.designation}</TableCell>
+                    <TableCell className="hidden xl:table-cell">{employee.kyc_status}</TableCell>
+                    <TableCell>
+                      <div className="flex space-x-2">
+                        <Button onClick={() => handleEdit(employee)} size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="destructive" onClick={() => handleDelete(employee.emp_id)} size="sm">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
 
-      {/* Edit Employee Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
+      <Dialog open={isEditDialogOpen || isCreateDialogOpen} onOpenChange={() => {
+        setIsEditDialogOpen(false);
+        setIsCreateDialogOpen(false);
+        resetEmployeeForm();
+      }}>
+        <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Edit Employee</DialogTitle>
+            <DialogTitle>{isEditDialogOpen ? 'Edit Employee' : 'Create New Employee'}</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleUpsertEmployee} className="space-y-4">
             {errorMessages.length > 0 && (
@@ -219,116 +224,59 @@ const EmployeeManagement = () => {
                 ))}
               </Alert>
             )}
-            <div>
-              <Label htmlFor="emp_id">Employee ID</Label>
-              <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required disabled />
-            </div>
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" value={currentEmployee.name || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={currentEmployee.email || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="official_email">Official Email</Label>
-              <Input id="official_email" name="official_email" type="email" value={currentEmployee.official_email || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="designation">Designation</Label>
-              <Input id="designation" name="designation" value={currentEmployee.designation || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="date_of_joining">Date of Joining</Label>
-              <Input id="date_of_joining" name="date_of_joining" type="date" value={currentEmployee.date_of_joining || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="phone_no">Phone Number</Label>
-              <Input id="phone_no" name="phone_no" value={currentEmployee.phone_no || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
-              <Input id="emergency_contact_no" name="emergency_contact_no" value={currentEmployee.emergency_contact_no || ''} onChange={handleInputChange} />
-            </div>
-            <div>
-              <Label htmlFor="dob">Date of Birth</Label>
-              <Input id="dob" name="dob" type="date" value={currentEmployee.dob || ''} onChange={handleInputChange} />
-            </div>
-            <div>
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" name="address" value={currentEmployee.address || ''} onChange={handleInputChange} />
-            </div>
-            <div>
-              <Label htmlFor="kyc_status">KYC Status</Label>
-              <Input id="kyc_status" name="kyc_status" value={currentEmployee.kyc_status || 'Pending'} onChange={handleInputChange} required />
-            </div>
-            <div className="flex justify-end space-x-2">
-              <Button type="submit">Update Employee</Button>
-              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>Cancel</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Employee Dialog */}
-      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Employee</DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleUpsertEmployee} className="space-y-4">
-            {errorMessages.length > 0 && (
-              <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
-                {errorMessages.map((message, index) => (
-                  <AlertDescription key={index}>{message}</AlertDescription>
-                ))}
-              </Alert>
-            )}
-            <div>
-              <Label htmlFor="emp_id">Employee ID</Label>
-              <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="name">Name</Label>
-              <Input id="name" name="name" value={currentEmployee.name || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" value={currentEmployee.email || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="official_email">Official Email</Label>
-              <Input id="official_email" name="official_email" type="email" value={currentEmployee.official_email || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="designation">Designation</Label>
-              <Input id="designation" name="designation" value={currentEmployee.designation || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="date_of_joining">Date of Joining</Label>
-              <Input id="date_of_joining" name="date_of_joining" type="date" value={currentEmployee.date_of_joining || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="phone_no">Phone Number</Label>
-              <Input id="phone_no" name="phone_no" value={currentEmployee.phone_no || ''} onChange={handleInputChange} required />
-            </div>
-            <div>
-              <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
-              <Input id="emergency_contact_no" name="emergency_contact_no" value={currentEmployee.emergency_contact_no || ''} onChange={handleInputChange} />
-            </div>
-            <div>
-              <Label htmlFor="dob">Date of Birth</Label>
-              <Input id="dob" name="dob" type="date" value={currentEmployee.dob || ''} onChange={handleInputChange} />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="emp_id">Employee ID</Label>
+                <Input id="emp_id" name="emp_id" value={currentEmployee.emp_id || ''} onChange={handleInputChange} required disabled={isEditDialogOpen} />
+              </div>
+              <div>
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" name="name" value={currentEmployee.name || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" value={currentEmployee.email || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="official_email">Official Email</Label>
+                <Input id="official_email" name="official_email" type="email" value={currentEmployee.official_email || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="designation">Designation</Label>
+                <Input id="designation" name="designation" value={currentEmployee.designation || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="date_of_joining">Date of Joining</Label>
+                <Input id="date_of_joining" name="date_of_joining" type="date" value={currentEmployee.date_of_joining || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="phone_no">Phone Number</Label>
+                <Input id="phone_no" name="phone_no" value={currentEmployee.phone_no || ''} onChange={handleInputChange} required />
+              </div>
+              <div>
+                <Label htmlFor="emergency_contact_no">Emergency Contact</Label>
+                <Input id="emergency_contact_no" name="emergency_contact_no" value={currentEmployee.emergency_contact_no || ''} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="dob">Date of Birth</Label>
+                <Input id="dob" name="dob" type="date" value={currentEmployee.dob || ''} onChange={handleInputChange} />
+              </div>
+              <div>
+                <Label htmlFor="kyc_status">KYC Status</Label>
+                <Input id="kyc_status" name="kyc_status" value={currentEmployee.kyc_status || 'Pending'} onChange={handleInputChange} required />
+              </div>
             </div>
             <div>
               <Label htmlFor="address">Address</Label>
               <Input id="address" name="address" value={currentEmployee.address || ''} onChange={handleInputChange} />
             </div>
             <div className="flex justify-end space-x-2">
-              <Button type="submit">Create Employee</Button>
-              <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>Cancel</Button>
+              <Button type="submit">{isEditDialogOpen ? 'Update Employee' : 'Create Employee'}</Button>
+              <Button type="button" variant="outline" onClick={() => {
+                setIsEditDialogOpen(false);
+                setIsCreateDialogOpen(false);
+                resetEmployeeForm();
+              }}>Cancel</Button>
             </div>
           </form>
         </DialogContent>
